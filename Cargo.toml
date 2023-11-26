@@ -1,0 +1,18 @@
+[package]
+name = "jvm-rs"
+version = "0.1.0"
+edition = "2021"
+description = " JVM implemented in rust."
+repository = "https://github.com/JasonkayZK/jvm-rs"
+license-file = "LICENSE"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[workspace]
+
+members = [
+    "ch01_cmd",
+]
+
+[workspace.dependencies]
+clap = { version = "4.4.8", features = ["derive"] }
