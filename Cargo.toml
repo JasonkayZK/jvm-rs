@@ -12,7 +12,9 @@ license-file = "LICENSE"
 
 members = [
     "ch01_cmd",
+    "ch02_classpath",
 ]
 
 [workspace.dependencies]
 clap = { version = "4.4.8", features = ["derive"] }
+thiserror = { version = "1.0"}

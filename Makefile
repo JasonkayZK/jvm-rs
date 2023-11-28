@@ -8,13 +8,13 @@ fmt:
 	cargo fmt --all --
 
 clippy:
-	cargo clippy --  -D warnings
+	cargo clippy --all -- -D warnings
 
 clean:
-	rm -rf ./target
+	rm -rf ./target && rm -rf ./*/target
 
 build:
-	cargo build
+	cargo build --all
 
 pack:
-	cargo build --release
+	cargo build --all --release
