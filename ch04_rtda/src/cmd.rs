@@ -1,8 +1,8 @@
 use clap::{Args, Parser};
 
-use crate::classfile::class_file::ClassFile;
-use crate::classpath::classpath_impl::ClasspathImpl;
-use crate::classpath::entry::Entry;
+use crate::rtda::frame::Frame;
+use crate::rtda::local_var::LocalVar;
+use crate::rtda::operand_stack::OperandStack;
 
 #[derive(Debug, Parser)]
 #[command(name = "java", version = "0.0.1")]
@@ -16,70 +16,59 @@ pub struct Cmd {
 
 #[derive(Args, Debug)]
 pub struct CpArgs {
-    #[clap(long = "cp", required = true, help = "The classpath")]
+    #[clap(
+        long = "cp",
+        required = false,
+        help = "The classpath",
+        default_value = ""
+    )]
     pub classpath: String,
 
-    #[clap(name = "CLASS", required = true, help = "Main class name")]
+    #[clap(name = "CLASS", required = false, help = "Main class name")]
     pub class: String,
 
     #[clap(name = "ARGS", help = "Arguments")]
     pub args: Vec<String>,
 }
 
-pub fn start_jvm(cp_args: &CpArgs, xjre_option: &Option<String>) {
-    let mut cp = ClasspathImpl::parse(
-        xjre_option.as_ref().unwrap_or(&String::new()),
-        &cp_args.classpath,
-    );
-
-    println!(
-        "classpath: {} class: {} args: {:?}",
-        cp, cp_args.class, cp_args.args
-    );
-
-    let class_name = cp_args.class.replace('.', "/");
-    let class_file = load_class(&class_name, &mut cp);
-    print_class_info(&class_file);
+pub fn start_jvm(_cp_args: &CpArgs, _xjre_option: &Option<String>) {
+    let mut frame = Frame::new(100, 100);
+    test_local_vars(frame.local_vars_mut());
+    test_operand_stack(frame.operand_stack_mut());
 }
 
-fn load_class(class_name: &str, class_path: &mut ClasspathImpl) -> ClassFile {
-    let class_data = match class_path.read_class(class_name) {
-        Ok(class_data) => class_data,
-        Err(err) => {
-            panic!("Could not find or load main class {}: {}", class_name, err);
-        }
-    };
+fn test_local_vars(local_vars: &mut LocalVar) {
+    local_vars.set_int(0, 100);
+    local_vars.set_int(1, -100);
+    local_vars.set_long(2, 2997924580);
+    local_vars.set_long(4, -2997924580);
+    local_vars.set_float(6, std::f32::consts::PI);
+    local_vars.set_double(7, std::f64::consts::E);
+    local_vars.set_ref(9, None);
 
-    match ClassFile::parse(class_data) {
-        Ok(class_file) => class_file,
-        Err(err) => panic!("{}", err),
-    }
+    println!("{}", local_vars.get_int(0));
+    println!("{}", local_vars.get_int(1));
+    println!("{}", local_vars.get_long(2));
+    println!("{}", local_vars.get_long(4));
+    println!("{}", local_vars.get_float(6));
+    println!("{}", local_vars.get_double(7));
+    println!("{:?}", local_vars.get_ref(9));
 }
 
-fn print_class_info(class_file: &ClassFile) {
-    println!(
-        "version: {}.{}",
-        class_file.major_version(),
-        class_file.minor_version()
-    );
-    println!(
-        "constants count: {}",
-        class_file.constant_pool().borrow().infos.len()
-    );
-    println!("access flags: 0x{:x}", class_file.access_flags());
-    println!("this class: {}", class_file.class_name());
-    println!("super class: {}", class_file.super_class_name());
-    println!("interfaces: {:?}", class_file.interface_names());
-    println!("fields count: {:?}", class_file.fields().len());
-    for field in class_file.fields() {
-        println!(" {}", field.name());
-    }
-    println!("methods count: {:?}", class_file.methods().len());
-    for method in class_file.methods() {
-        println!(" {}", method.name());
-    }
-    println!("attributes count: {:?}", class_file.attributes().len());
-    for attribute in class_file.attributes() {
-        println!(" {}", attribute);
-    }
+fn test_operand_stack(operand_stack: &mut OperandStack) {
+    operand_stack.push_int(100);
+    operand_stack.push_int(-100);
+    operand_stack.push_long(2997924580);
+    operand_stack.push_long(-2997924580);
+    operand_stack.push_float(std::f32::consts::PI);
+    operand_stack.push_double(std::f64::consts::E);
+    operand_stack.push_ref(None);
+
+    println!("{:?}", operand_stack.pop_ref());
+    println!("{}", operand_stack.pop_double());
+    println!("{}", operand_stack.pop_float());
+    println!("{}", operand_stack.pop_long());
+    println!("{}", operand_stack.pop_long());
+    println!("{}", operand_stack.pop_int());
+    println!("{}", operand_stack.pop_int());
 }
