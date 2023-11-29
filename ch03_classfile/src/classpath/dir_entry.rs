@@ -4,7 +4,7 @@ use std::io::Read;
 use std::path::Path;
 
 use crate::classpath::entry::{absolute, Entry};
-use crate::error::entry::EntryError;
+use crate::classpath::errors::EntryError;
 
 /// 目录形式的类路径
 pub struct DirEntry {

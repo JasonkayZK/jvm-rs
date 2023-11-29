@@ -2,8 +2,8 @@ use std::path::Path;
 use std::{env, fmt, fs};
 
 use crate::classpath::entry::{new_entry, Entry};
+use crate::classpath::errors::EntryError;
 use crate::classpath::wildcard_entry::WildcardEntry;
-use crate::error::entry::EntryError;
 
 const JAVA_HOME: &str = "JAVA_HOME";
 

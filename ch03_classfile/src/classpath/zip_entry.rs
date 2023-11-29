@@ -6,7 +6,7 @@ use std::path::Path;
 use zip::ZipArchive;
 
 use crate::classpath::entry::{absolute, Entry};
-use crate::error::entry::EntryError;
+use crate::classpath::errors::EntryError;
 
 /// ZIP 或 JAR 文件形式的类路径
 pub struct ZipEntry {

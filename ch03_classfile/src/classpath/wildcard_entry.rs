@@ -1,8 +1,8 @@
 use std::{fmt, fs};
 
 use crate::classpath::entry::{Entry, PATH_SEPARATOR};
+use crate::classpath::errors::EntryError;
 use crate::classpath::zip_entry::ZipEntry;
-use crate::error::entry::EntryError;
 
 /// 处理以 * 结尾的类路径
 #[derive(Default)]
@@ -46,7 +46,7 @@ impl Entry for WildcardEntry {
                     return Ok(data);
                 }
                 Err(err) => {
-                    println!("Error reading class: {}", err);
+                    println!("Warning: reading class err: {}", err);
                 }
             }
         }

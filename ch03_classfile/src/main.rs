@@ -1,9 +1,9 @@
 use crate::cmd::{start_jvm, Cmd};
 use clap::Parser;
 
-mod classpath;
-mod cmd;
-mod error;
+pub mod classfile;
+pub mod classpath;
+pub mod cmd;
 
 fn main() {
     let cmd = Cmd::parse();

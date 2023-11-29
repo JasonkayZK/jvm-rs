@@ -3,9 +3,9 @@ use std::fmt::Display;
 use std::path::Path;
 
 use crate::classpath::dir_entry::DirEntry;
+use crate::classpath::errors::EntryError;
 use crate::classpath::wildcard_entry::WildcardEntry;
 use crate::classpath::zip_entry::ZipEntry;
-use crate::error::entry::EntryError;
 
 #[cfg(windows)]
 pub const PATH_SEPARATOR: char = ';';

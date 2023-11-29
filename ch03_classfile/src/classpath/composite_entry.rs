@@ -1,7 +1,7 @@
 use std::fmt;
 
 use crate::classpath::entry::{new_entry, Entry, PATH_SEPARATOR};
-use crate::error::entry::EntryError;
+use crate::classpath::errors::EntryError;
 
 /// 由多个 Entry 组成
 pub struct CompositeEntry {
@@ -27,7 +27,7 @@ impl Entry for CompositeEntry {
                     return Ok(data);
                 }
                 Err(err) => {
-                    println!("Error reading class: {}", err);
+                    println!("Warning: reading class err: {}", err);
                 }
             }
         }
