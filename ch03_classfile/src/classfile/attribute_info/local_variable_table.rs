@@ -12,12 +12,13 @@
 //!     } local_variable_table[local_variable_table_length];
 //! }
 
-use super::{AttributeInfo, ClassReader};
+use std::cell::RefCell;
+use std::fmt::{Display, Formatter};
+use std::rc::Rc;
 
-#[derive(Default)]
-pub struct LocalVariableTableAttribute {
-    local_variable_table: Vec<LocalVariableTableEntry>,
-}
+use crate::classfile::constant_pool::ConstantPool;
+
+use super::{AttributeInfo, ClassReader};
 
 pub struct LocalVariableTableEntry {
     start_pc: u16,
@@ -25,6 +26,38 @@ pub struct LocalVariableTableEntry {
     name_index: u16,
     descriptor_index: u16,
     index: u16,
+}
+
+#[derive(Default)]
+pub struct LocalVariableTableAttribute {
+    constant_pool: Rc<RefCell<ConstantPool>>,
+    local_variable_table: Vec<LocalVariableTableEntry>,
+}
+
+impl LocalVariableTableAttribute {
+    pub fn new(cp: Rc<RefCell<ConstantPool>>) -> LocalVariableTableAttribute {
+        Self {
+            constant_pool: cp,
+            ..Default::default()
+        }
+    }
+}
+
+impl Display for LocalVariableTableAttribute {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let mut entries = Vec::with_capacity(self.local_variable_table.len());
+        let cp = self.constant_pool.borrow();
+        for entry in &self.local_variable_table {
+            entries.push(format!("[LocalVariableTableEntry]: start_pc: {}, length: {}, name: {}, descriptor: {}, index: {}",
+                                 entry.start_pc,
+                                 entry.length, cp.get_utf8(entry.name_index), cp.get_utf8(entry.descriptor_index), entry.index))
+        }
+        write!(
+            f,
+            "[LocalVariableTableAttribute]:\n\t{}",
+            entries.join("\n\t\t")
+        )
+    }
 }
 
 impl AttributeInfo for LocalVariableTableAttribute {

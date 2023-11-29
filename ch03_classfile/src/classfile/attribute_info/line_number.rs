@@ -8,17 +8,56 @@
 //!         u2 line_number;
 //!     } line_number_table[line_number_table_length];
 //! }
+use std::cell::RefCell;
+use std::fmt::{Display, Formatter};
+use std::rc::Rc;
+
+use crate::classfile::constant_pool::ConstantPool;
 
 use super::{AttributeInfo, ClassReader};
-
-#[derive(Default)]
-pub struct LineNumberTableAttribute {
-    line_number_table: Vec<LineNumberTableEntry>,
-}
 
 pub struct LineNumberTableEntry {
     start_pc: u16,
     line_number: u16,
+}
+
+impl Display for LineNumberTableEntry {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "[LineNumberTableEntry], start_pc: {}, line_number: {}",
+            self.start_pc, self.line_number
+        )
+    }
+}
+
+#[derive(Default)]
+pub struct LineNumberTableAttribute {
+    constant_pool: Rc<RefCell<ConstantPool>>,
+    line_number_table: Vec<LineNumberTableEntry>,
+}
+
+impl LineNumberTableAttribute {
+    pub fn new(cp: Rc<RefCell<ConstantPool>>) -> LineNumberTableAttribute {
+        Self {
+            constant_pool: cp,
+            ..Default::default()
+        }
+    }
+}
+
+impl Display for LineNumberTableAttribute {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "[LineNumberTableAttribute]:\n\t{}",
+            self.line_number_table
+                .iter()
+                .map(|n| n.to_string())
+                .collect::<Vec<String>>()
+                .join("\n\t\t")
+        )
+    }
 }
 
 impl AttributeInfo for LineNumberTableAttribute {

@@ -6,11 +6,28 @@
 //!     u2 source_file_index;
 //! }
 
+use std::cell::RefCell;
+use std::fmt::{Display, Formatter};
+use std::rc::Rc;
+
+use crate::classfile::constant_pool::ConstantPool;
+
 use super::{AttributeInfo, ClassReader};
 
 #[derive(Default)]
 pub struct SourceFileAttribute {
+    constant_pool: Rc<RefCell<ConstantPool>>,
     source_file_index: u16,
+}
+
+impl Display for SourceFileAttribute {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "[SourceFileAttribute]:\n\t{}",
+            self.constant_pool.borrow().get_utf8(self.source_file_index)
+        )
+    }
 }
 
 impl AttributeInfo for SourceFileAttribute {
@@ -20,8 +37,10 @@ impl AttributeInfo for SourceFileAttribute {
 }
 
 impl SourceFileAttribute {
-    pub fn new() -> Self {
-        let mut sfa = SourceFileAttribute::default();
-        sfa
+    pub fn new(cp: Rc<RefCell<ConstantPool>>) -> SourceFileAttribute {
+        Self {
+            constant_pool: cp,
+            ..Default::default()
+        }
     }
 }

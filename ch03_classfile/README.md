@@ -1,5 +1,9 @@
 # **Chapter 3: 解析 Class 文件**
 
+Reference:
+
+- https://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html
+
 ## **解析标准库**
 
 执行：
@@ -117,6 +121,12 @@ methods count: 94
  intern
  compareTo
  <clinit>
+attributes count: 3
+ [SignatureAttribute]:
+        Ljava/lang/Object;Ljava/io/Serializable;Ljava/lang/Comparable<Ljava/lang/String;>;Ljava/lang/CharSequence;
+ [SourceFileAttribute]:
+        String.java
+ [InnerClassesAttribute]
 ```
 
 ## **解析自定义类**
@@ -153,6 +163,9 @@ fields count: 8
 methods count: 2
  <init>
  main
+attributes count: 1
+ [SourceFileAttribute]:
+        ClassFileTest.java
 ```
 
 > **注：报错 `Warning: reading class err: Read class failed: "Read class ClassFileTest.class err: specified file not found in archive"`**

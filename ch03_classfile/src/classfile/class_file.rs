@@ -95,6 +95,10 @@ impl ClassFile {
         &self.methods
     }
 
+    pub fn attributes(&self) -> &Vec<Box<dyn AttributeInfo>> {
+        &self.attributes
+    }
+
     pub fn class_name(&self) -> String {
         self.constant_pool.borrow().get_class_name(self.this_class)
     }
@@ -141,7 +145,7 @@ impl ClassFile {
     fn read_and_check_version(&mut self, reader: &mut ClassReader) -> ClassFileResult<()> {
         self.minor_version = reader.read_u16();
         self.major_version = reader.read_u16();
-        return match self.major_version {
+        match self.major_version {
             45 => Ok(()),
             46 | 47 | 48 | 49 | 50 | 51 | 52 => {
                 if self.minor_version == 0 {
@@ -155,6 +159,6 @@ impl ClassFile {
             _ => Err(ClassFileError::UnsupportedClassVersionError(
                 self.major_version,
             )),
-        };
+        }
     }
 }

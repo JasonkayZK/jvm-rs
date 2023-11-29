@@ -1,6 +1,8 @@
-use crate::cmd::{start_jvm, Cmd};
 use clap::Parser;
 
+use crate::cmd::{start_jvm, Cmd};
+
+#[allow(unused)]
 pub mod classfile;
 pub mod classpath;
 pub mod cmd;

@@ -54,7 +54,7 @@ impl MemberInfo {
             access_flags: reader.read_u16(),
             name_index: reader.read_u16(),
             descriptor_index: reader.read_u16(),
-            attributes: read_attributes(reader, cp.clone()),
+            attributes: read_attributes(reader, cp),
         }
     }
 

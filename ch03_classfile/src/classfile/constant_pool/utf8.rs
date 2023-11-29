@@ -92,8 +92,7 @@ impl ConstantUtf8Info {
                     if char2 & 0xC0 != 0x80 || char3 & 0xC0 != 0x80 {
                         panic!("malformed input around byte {}", count - 1)
                     }
-                    char_arr[char_arr_count] =
-                        c & 0x0F << 12 | char2 & 0x3F << 6 | char3 & 0x3F << 0;
+                    char_arr[char_arr_count] = c & 0x0F << 12 | char2 & 0x3F << 6 | char3 & 0x3F;
                     char_arr_count += 1;
                 }
                 // 10xx xxxx,  1111 xxxx

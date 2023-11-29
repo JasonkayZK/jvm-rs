@@ -43,19 +43,17 @@ pub fn start_jvm(cp_args: &CpArgs, xjre_option: &Option<String>) {
 }
 
 fn load_class(class_name: &str, class_path: &mut ClasspathImpl) -> ClassFile {
-    let class_data = match class_path.read_class(&class_name) {
+    let class_data = match class_path.read_class(class_name) {
         Ok(class_data) => class_data,
         Err(err) => {
             panic!("Could not find or load main class {}: {}", class_name, err);
         }
     };
 
-    let class_file = match ClassFile::parse(class_data) {
+    match ClassFile::parse(class_data) {
         Ok(class_file) => class_file,
         Err(err) => panic!("{}", err),
-    };
-
-    class_file
+    }
 }
 
 fn print_class_info(class_file: &ClassFile) {
@@ -79,5 +77,9 @@ fn print_class_info(class_file: &ClassFile) {
     println!("methods count: {:?}", class_file.methods().len());
     for method in class_file.methods() {
         println!(" {}", method.name());
+    }
+    println!("attributes count: {:?}", class_file.attributes().len());
+    for attribute in class_file.attributes() {
+        println!(" {}", attribute);
     }
 }

@@ -7,11 +7,22 @@
 //! }
 
 use super::{AttributeInfo, ClassReader};
+use std::fmt::{Display, Formatter};
 
 pub struct UnparsedAttribute {
     name: String,
     length: u32,
     info: Option<Vec<u8>>,
+}
+
+impl Display for UnparsedAttribute {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "[UnparsedAttribute]: name: {}, length: {}",
+            self.name, self.length
+        )
+    }
 }
 
 impl AttributeInfo for UnparsedAttribute {

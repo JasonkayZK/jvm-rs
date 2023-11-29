@@ -8,6 +8,7 @@
 //! }
 
 use std::cell::RefCell;
+use std::fmt::{Display, Formatter};
 use std::rc::Rc;
 
 use super::ConstantPool;
@@ -20,6 +21,18 @@ pub struct EnclosingMethodAttribute {
     method_index: u16,
 }
 
+impl Display for EnclosingMethodAttribute {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let cp = self.constant_pool.borrow();
+        write!(
+            f,
+            "[EnclosingMethodAttribute]:\n\tclass: {}\n\t\tmethod_index: {}",
+            cp.get_utf8(self.class_index),
+            cp.get_utf8(self.method_index)
+        )
+    }
+}
+
 impl AttributeInfo for EnclosingMethodAttribute {
     fn read_info(&mut self, reader: &mut ClassReader) {
         self.class_index = reader.read_u16();
@@ -29,8 +42,9 @@ impl AttributeInfo for EnclosingMethodAttribute {
 
 impl EnclosingMethodAttribute {
     pub fn new(cp: Rc<RefCell<ConstantPool>>) -> Self {
-        let mut ema = EnclosingMethodAttribute::default();
-        ema.constant_pool = cp;
-        ema
+        Self {
+            constant_pool: cp,
+            ..Default::default()
+        }
     }
 }

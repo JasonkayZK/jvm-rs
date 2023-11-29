@@ -7,6 +7,7 @@
 //! }
 
 use std::cell::RefCell;
+use std::fmt::{Display, Formatter};
 use std::rc::Rc;
 
 use super::ConstantPool;
@@ -18,6 +19,16 @@ pub struct SignatureAttribute {
     signature_index: u16,
 }
 
+impl Display for SignatureAttribute {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "[SignatureAttribute]:\n\t{}",
+            self.constant_pool.borrow().get_utf8(self.signature_index)
+        )
+    }
+}
+
 impl AttributeInfo for SignatureAttribute {
     fn read_info(&mut self, reader: &mut ClassReader) {
         self.signature_index = reader.read_u16();
@@ -26,8 +37,9 @@ impl AttributeInfo for SignatureAttribute {
 
 impl SignatureAttribute {
     pub fn new(cp: Rc<RefCell<ConstantPool>>) -> Self {
-        let mut sa = SignatureAttribute::default();
-        sa.constant_pool = cp;
-        sa
+        Self {
+            constant_pool: cp,
+            ..Default::default()
+        }
     }
 }

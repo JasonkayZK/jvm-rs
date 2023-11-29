@@ -71,7 +71,7 @@ pub fn read_constant_pool(reader: &mut ClassReader) -> Rc<RefCell<ConstantPool>>
         // If a CONSTANT_Long_info or CONSTANT_Double_info structure is the item in the constant_pool
         // table at index n, then the next usable item in the pool is located at index n+2.
         // The constant_pool index n+1 must be valid but is considered unusable.
-        match (&constant_info).tag() {
+        match constant_info.tag() {
             // CONSTANT_Long_info 和 CONSTANT_Double_info 各占两个位置
             consts::CONSTANT_LONG | consts::CONSTANT_DOUBLE => {
                 cp.borrow_mut().infos.push(Some(constant_info));
@@ -96,7 +96,7 @@ fn read_constant_info(
 ) -> Box<dyn ConstantInfo> {
     let tag = reader.read_u8();
     let mut c = new_constant_info(reader, tag, i, cp);
-    match (&c).tag() {
+    match c.tag() {
         // CONSTANT_Utf8_info、CONSTANT_Class_info 在创建之后立即调用 read_info
         consts::CONSTANT_UTF8 | consts::CONSTANT_CLASS => {}
         _ => c.read_info(reader),
@@ -122,21 +122,21 @@ fn new_constant_info(
         consts::CONSTANT_METHOD_REF => Box::new(ConstantMethodRefInfo::new(cp)),
         consts::CONSTANT_INTERFACE_METHOD_REF => Box::new(ConstantInterfaceMethodRefInfo::new(cp)),
         consts::CONSTANT_STRING => Box::new(ConstantStringInfo::new(cp)),
-        consts::CONSTANT_INTEGER => Box::new(ConstantIntegerInfo::default()),
-        consts::CONSTANT_FLOAT => Box::new(ConstantFloatInfo::default()),
-        consts::CONSTANT_LONG => Box::new(ConstantLongInfo::default()),
-        consts::CONSTANT_DOUBLE => Box::new(ConstantDoubleInfo::default()),
-        consts::CONSTANT_NAME_AND_TYPE => Box::new(ConstantNameAndTypeInfo::default()),
+        consts::CONSTANT_INTEGER => Box::<ConstantIntegerInfo>::default(),
+        consts::CONSTANT_FLOAT => Box::<ConstantFloatInfo>::default(),
+        consts::CONSTANT_LONG => Box::<ConstantLongInfo>::default(),
+        consts::CONSTANT_DOUBLE => Box::<ConstantDoubleInfo>::default(),
+        consts::CONSTANT_NAME_AND_TYPE => Box::<ConstantNameAndTypeInfo>::default(),
         consts::CONSTANT_UTF8 => {
-            let mut b = Box::new(ConstantUtf8Info::default());
+            let mut b = Box::<ConstantUtf8Info>::default();
             // 立即调用
             b.read_info(reader);
             cp.borrow_mut().utf8_info_map.insert(i, *b.clone());
             b
         }
-        consts::CONSTANT_METHOD_HANDLE => Box::new(ConstantMethodHandleInfo::default()),
-        consts::CONSTANT_METHOD_TYPE => Box::new(ConstantMethodTypeInfo::default()),
-        consts::CONSTANT_INVOKE_DYNAMIC => Box::new(ConstantInvokeDynamicInfo::default()),
+        consts::CONSTANT_METHOD_HANDLE => Box::<ConstantMethodHandleInfo>::default(),
+        consts::CONSTANT_METHOD_TYPE => Box::<ConstantMethodTypeInfo>::default(),
+        consts::CONSTANT_INVOKE_DYNAMIC => Box::<ConstantInvokeDynamicInfo>::default(),
         _ => panic!(
             "{}",
             "java.lang.ClassFormatError: unknown constant pool tag!"

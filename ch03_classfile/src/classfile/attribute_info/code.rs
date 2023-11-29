@@ -18,6 +18,7 @@
 //! }
 
 use std::cell::RefCell;
+use std::fmt::{Display, Formatter};
 use std::rc::Rc;
 
 use super::ConstantPool;
@@ -33,6 +34,13 @@ pub struct CodeAttribute {
     attributes: Vec<Box<dyn AttributeInfo>>,
 }
 
+impl Display for CodeAttribute {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "[CodeAttribute]: \n\tmax_stack: {}, \n\tmax_locals: {}, \n\tcode_len: {}, \n\texception_table: \n\t\t{}, \n\tattributes: \n\t\t{}",
+               self.max_stack, self.max_locals, self.code.len(), self.exception_table.iter().map(|n| n.to_string()).collect::<Vec<String>>().join("\n\t\t"), self.attributes.iter().map(|n| n.to_string()).collect::<Vec<String>>().join("\n\t\t"))
+    }
+}
+
 impl AttributeInfo for CodeAttribute {
     fn read_info(&mut self, reader: &mut ClassReader) {
         self.max_stack = reader.read_u16();
@@ -46,9 +54,10 @@ impl AttributeInfo for CodeAttribute {
 
 impl CodeAttribute {
     pub fn new(cp: Rc<RefCell<ConstantPool>>) -> Self {
-        let mut ca = CodeAttribute::default();
-        ca.constant_pool = cp;
-        ca
+        Self {
+            constant_pool: cp,
+            ..Default::default()
+        }
     }
 }
 
@@ -57,6 +66,16 @@ pub struct ExceptionTableEntry {
     end_pc: u16,
     handler_pc: u16,
     catch_type: u16,
+}
+
+impl Display for ExceptionTableEntry {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "[CodeAttribute]: \n\tstart_pc: {}, \n\tend_pc: {}, \n\thandler_pc: {}, \n\tcatch_type: {}",
+            self.start_pc, self.end_pc, self.handler_pc, self.catch_type
+        )
+    }
 }
 
 fn read_exception_table(reader: &mut ClassReader) -> Vec<ExceptionTableEntry> {

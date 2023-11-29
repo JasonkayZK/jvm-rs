@@ -12,12 +12,13 @@
 //!     } local_variable_type_table[local_variable_type_table_length];
 //! }
 
-use super::{AttributeInfo, ClassReader};
+use std::cell::RefCell;
+use std::fmt::{Display, Formatter};
+use std::rc::Rc;
 
-#[derive(Default)]
-pub struct LocalVariableTypeTableAttribute {
-    local_variable_type_table: Vec<LocalVariableTypeTableEntry>,
-}
+use crate::classfile::constant_pool::ConstantPool;
+
+use super::{AttributeInfo, ClassReader};
 
 pub struct LocalVariableTypeTableEntry {
     start_pc: u16,
@@ -25,6 +26,27 @@ pub struct LocalVariableTypeTableEntry {
     name_index: u16,
     signature_index: u16,
     index: u16,
+}
+
+#[derive(Default)]
+pub struct LocalVariableTypeTableAttribute {
+    constant_pool: Rc<RefCell<ConstantPool>>,
+    local_variable_type_table: Vec<LocalVariableTypeTableEntry>,
+}
+
+impl LocalVariableTypeTableAttribute {
+    pub fn new(cp: Rc<RefCell<ConstantPool>>) -> LocalVariableTypeTableAttribute {
+        Self {
+            constant_pool: cp,
+            ..Default::default()
+        }
+    }
+}
+
+impl Display for LocalVariableTypeTableAttribute {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "[LocalVariableTypeTableAttribute]")
+    }
 }
 
 impl AttributeInfo for LocalVariableTypeTableAttribute {
