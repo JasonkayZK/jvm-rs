@@ -62,7 +62,7 @@ impl ConstantUtf8Info {
             }
             c = bytes[count as usize] as u16;
             match c >> 4 {
-                0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 => {
+                0..=7 => {
                     // 0xxxxxxx
                     count += 1;
                     char_arr[char_arr_count] = c;

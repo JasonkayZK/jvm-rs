@@ -21,6 +21,12 @@ pub struct ASTORE {
     pub index: usize,
 }
 
+impl ASTORE {
+    pub fn new(index: usize) -> Self {
+        Self { index }
+    }
+}
+
 impl Instruction for ASTORE {
     fn fetch_operands(&mut self, reader: &mut BytecodeReader) {
         self.index = reader.read_u8() as usize;

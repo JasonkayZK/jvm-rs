@@ -10,6 +10,12 @@ pub struct ILOAD {
     pub index: usize,
 }
 
+impl ILOAD {
+    pub fn new(index: usize) -> Self {
+        Self { index }
+    }
+}
+
 impl Instruction for ILOAD {
     fn fetch_operands(&mut self, reader: &mut BytecodeReader) {
         self.index = reader.read_u8() as usize;

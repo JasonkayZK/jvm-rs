@@ -10,6 +10,12 @@ pub struct LSTORE {
     pub index: usize,
 }
 
+impl LSTORE {
+    pub fn new(index: usize) -> Self {
+        Self { index }
+    }
+}
+
 impl Instruction for LSTORE {
     fn fetch_operands(&mut self, reader: &mut BytecodeReader) {
         self.index = reader.read_u8() as usize;

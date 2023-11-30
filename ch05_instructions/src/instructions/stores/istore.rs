@@ -10,6 +10,12 @@ pub struct ISTORE {
     pub index: usize,
 }
 
+impl ISTORE {
+    pub fn new(index: usize) -> Self {
+        Self { index }
+    }
+}
+
 impl Instruction for ISTORE {
     fn fetch_operands(&mut self, reader: &mut BytecodeReader) {
         self.index = reader.read_u8() as usize;

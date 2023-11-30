@@ -11,6 +11,12 @@ pub struct IINC {
     pub const_val: i32,
 }
 
+impl IINC {
+    pub fn new(index: usize, const_val: i32) -> Self {
+        Self { index, const_val }
+    }
+}
+
 impl Instruction for IINC {
     fn fetch_operands(&mut self, reader: &mut BytecodeReader) {
         self.index = reader.read_u8() as usize;

@@ -18,62 +18,22 @@ impl Instruction for WIDE {
     fn fetch_operands(&mut self, reader: &mut BytecodeReader) {
         let opcode = reader.read_u8();
         self.modified_instruction = match opcode {
-            0x15 => {
-                let mut inst = ILOAD::default();
-                inst.index = reader.read_u16() as usize;
-                Some(Box::new(inst))
-            }
-            0x16 => {
-                let mut inst = LLOAD::default();
-                inst.index = reader.read_u16() as usize;
-                Some(Box::new(inst))
-            }
-            0x17 => {
-                let mut inst = FLOAD::default();
-                inst.index = reader.read_u16() as usize;
-                Some(Box::new(inst))
-            }
-            0x18 => {
-                let mut inst = DLOAD::default();
-                inst.index = reader.read_u16() as usize;
-                Some(Box::new(inst))
-            }
-            0x19 => {
-                let mut inst = ALOAD::default();
-                inst.index = reader.read_u16() as usize;
-                Some(Box::new(inst))
-            }
-            0x36 => {
-                let mut inst = ISTORE::default();
-                inst.index = reader.read_u16() as usize;
-                Some(Box::new(inst))
-            }
-            0x37 => {
-                let mut inst = LSTORE::default();
-                inst.index = reader.read_u16() as usize;
-                Some(Box::new(inst))
-            }
-            0x38 => {
-                let mut inst = FSTORE::default();
-                inst.index = reader.read_u16() as usize;
-                Some(Box::new(inst))
-            }
-            0x39 => {
-                let mut inst = DSTORE::default();
-                inst.index = reader.read_u16() as usize;
-                Some(Box::new(inst))
-            }
-            0x3a => {
-                let mut inst = ASTORE::default();
-                inst.index = reader.read_u16() as usize;
-                Some(Box::new(inst))
-            }
+            0x15 => Some(Box::new(ILOAD::new(reader.read_u16() as usize))),
+            0x16 => Some(Box::new(LLOAD::new(reader.read_u16() as usize))),
+            0x17 => Some(Box::new(FLOAD::new(reader.read_u16() as usize))),
+            0x18 => Some(Box::new(DLOAD::new(reader.read_u16() as usize))),
+            0x19 => Some(Box::new(ALOAD::new(reader.read_u16() as usize))),
+            0x36 => Some(Box::new(ISTORE::new(reader.read_u16() as usize))),
+            0x37 => Some(Box::new(LSTORE::new(reader.read_u16() as usize))),
+            0x38 => Some(Box::new(FSTORE::new(reader.read_u16() as usize))),
+            0x39 => Some(Box::new(DSTORE::new(reader.read_u16() as usize))),
+            0x3a => Some(Box::new(ASTORE::new(reader.read_u16() as usize))),
             0x84 => {
-                let mut inst = IINC::default();
-                inst.index = reader.read_u16() as usize;
-                inst.const_val = reader.read_i16() as i32;
-                Some(Box::new(inst))
+                let index = reader.read_u16() as usize;
+                let const_val = reader.read_i16() as i32;
+                Some(Box::new(IINC::new(index, const_val)))
             }
+            // Ret
             0xa9 => {
                 panic!("{}", "Unsupported opcode: 0xa9!");
             }

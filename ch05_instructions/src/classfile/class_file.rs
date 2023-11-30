@@ -147,7 +147,7 @@ impl ClassFile {
         self.major_version = reader.read_u16();
         match self.major_version {
             45 => Ok(()),
-            46 | 47 | 48 | 49 | 50 | 51 | 52 => {
+            46..=52 => {
                 if self.minor_version == 0 {
                     Ok(())
                 } else {

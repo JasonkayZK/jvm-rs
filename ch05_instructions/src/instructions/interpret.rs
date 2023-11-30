@@ -7,19 +7,16 @@ use crate::instructions::factory::new_instruction;
 use crate::rtda::thread::Thread;
 
 pub fn interpret(method_info: &MemberInfo) {
-    match method_info.code_attribute() {
-        Some(info) => {
-            let thread_ref = Thread::new_ref();
-            let frame = Thread::new_frame(
-                thread_ref.clone(),
-                info.max_locals() as usize,
-                info.max_stack() as usize,
-            );
-            thread_ref.borrow_mut().push_frame(frame);
+    if let Some(info) = method_info.code_attribute() {
+        let thread_ref = Thread::new_ref();
+        let frame = Thread::new_frame(
+            thread_ref.clone(),
+            info.max_locals() as usize,
+            info.max_stack() as usize,
+        );
+        thread_ref.borrow_mut().push_frame(frame);
 
-            interpret_loop(thread_ref, info.code());
-        }
-        None => {}
+        interpret_loop(thread_ref, info.code());
     }
 }
 

@@ -49,6 +49,6 @@ impl Thread {
         max_locals: usize,
         max_stack: usize,
     ) -> Frame {
-        return Frame::new(thread_ref, max_locals, max_stack);
+        Frame::new(thread_ref, max_locals, max_stack)
     }
 }

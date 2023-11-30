@@ -16,7 +16,7 @@ impl Instruction for IFNULL {
     }
 
     fn execute(&mut self, frame: &mut Frame) {
-        if frame.operand_stack_mut().pop_ref() == None {
+        if frame.operand_stack_mut().pop_ref().is_none() {
             branch(frame, self.offset);
         }
     }
@@ -34,7 +34,7 @@ impl Instruction for IFNONNULL {
     }
 
     fn execute(&mut self, frame: &mut Frame) {
-        if frame.operand_stack_mut().pop_ref() != None {
+        if frame.operand_stack_mut().pop_ref().is_some() {
             branch(frame, self.offset);
         }
     }

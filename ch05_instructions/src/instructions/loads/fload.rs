@@ -10,6 +10,12 @@ pub struct FLOAD {
     pub index: usize,
 }
 
+impl FLOAD {
+    pub fn new(index: usize) -> Self {
+        Self { index }
+    }
+}
+
 impl Instruction for FLOAD {
     fn fetch_operands(&mut self, reader: &mut BytecodeReader) {
         self.index = reader.read_u8() as usize;

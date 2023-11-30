@@ -10,6 +10,12 @@ pub struct FSTORE {
     pub index: usize,
 }
 
+impl FSTORE {
+    pub fn new(index: usize) -> Self {
+        Self { index }
+    }
+}
+
 impl Instruction for FSTORE {
     fn fetch_operands(&mut self, reader: &mut BytecodeReader) {
         self.index = reader.read_u8() as usize;

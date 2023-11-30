@@ -17,7 +17,7 @@ impl Instruction for DUP {
     fn execute(&mut self, frame: &mut Frame) {
         let stack = frame.operand_stack_mut();
         let reference = stack.pop_ref();
-        let reference2 = reference.clone();
+        let reference2 = reference;
         stack.push_ref(reference);
         stack.push_ref(reference2);
     }
@@ -38,7 +38,7 @@ impl Instruction for DUP_X1 {
         let stack = frame.operand_stack_mut();
         let reference1 = stack.pop_ref();
         let reference2 = stack.pop_ref();
-        stack.push_ref(reference1.clone());
+        stack.push_ref(reference1);
         stack.push_ref(reference2);
         stack.push_ref(reference1);
     }
@@ -60,7 +60,7 @@ impl Instruction for DUP_X2 {
         let reference1 = stack.pop_ref();
         let reference2 = stack.pop_ref();
         let reference3 = stack.pop_ref();
-        stack.push_ref(reference1.clone());
+        stack.push_ref(reference1);
         stack.push_ref(reference3);
         stack.push_ref(reference2);
         stack.push_ref(reference1);
@@ -82,8 +82,8 @@ impl Instruction for DUP2 {
         let stack = frame.operand_stack_mut();
         let reference1 = stack.pop_ref();
         let reference2 = stack.pop_ref();
-        stack.push_ref(reference2.clone());
-        stack.push_ref(reference1.clone());
+        stack.push_ref(reference2);
+        stack.push_ref(reference1);
         stack.push_ref(reference2);
         stack.push_ref(reference1);
     }
@@ -105,8 +105,8 @@ impl Instruction for DUP2_X1 {
         let reference1 = stack.pop_ref();
         let reference2 = stack.pop_ref();
         let reference3 = stack.pop_ref();
-        stack.push_ref(reference2.clone());
-        stack.push_ref(reference1.clone());
+        stack.push_ref(reference2);
+        stack.push_ref(reference1);
         stack.push_ref(reference3);
         stack.push_ref(reference2);
         stack.push_ref(reference1);
@@ -130,8 +130,8 @@ impl Instruction for DUP2_X2 {
         let reference2 = stack.pop_ref();
         let reference3 = stack.pop_ref();
         let reference4 = stack.pop_ref();
-        stack.push_ref(reference2.clone());
-        stack.push_ref(reference1.clone());
+        stack.push_ref(reference2);
+        stack.push_ref(reference1);
         stack.push_ref(reference4);
         stack.push_ref(reference3);
         stack.push_ref(reference2);

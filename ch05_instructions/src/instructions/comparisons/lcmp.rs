@@ -1,5 +1,7 @@
 #![allow(non_camel_case_types)]
 
+use std::cmp::Ordering;
+
 use crate::instructions::base::Instruction;
 use crate::rtda::frame::Frame;
 
@@ -12,12 +14,10 @@ impl Instruction for LCMP {
         let stack = frame.operand_stack_mut();
         let v2 = stack.pop_long();
         let v1 = stack.pop_long();
-        if v1 > v2 {
-            stack.push_int(1);
-        } else if v1 == v2 {
-            stack.push_int(0);
-        } else {
-            stack.push_int(-1);
+        match v1.cmp(&v2) {
+            Ordering::Less => stack.push_int(-1),
+            Ordering::Equal => stack.push_int(0),
+            Ordering::Greater => stack.push_int(1),
         }
     }
 }
