@@ -6,6 +6,8 @@
 //!     u2 signature_index;
 //! }
 
+use crate::classfile::attribute_info::types::AttributeTypeNameEnum;
+use std::any::Any;
 use std::cell::RefCell;
 use std::fmt::{Display, Formatter};
 use std::rc::Rc;
@@ -32,6 +34,14 @@ impl Display for SignatureAttribute {
 impl AttributeInfo for SignatureAttribute {
     fn read_info(&mut self, reader: &mut ClassReader) {
         self.signature_index = reader.read_u16();
+    }
+
+    fn name(&self) -> &str {
+        AttributeTypeNameEnum::Signature.into()
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }
 

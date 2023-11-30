@@ -1,9 +1,12 @@
-use crate::rtda::frame::Frame;
-use crate::rtda::stack::Stack;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-#[derive(Default)]
+use crate::rtda::frame::Frame;
+use crate::rtda::stack::Stack;
+
+const MAX_RUNTIME_STACK_SIZE: usize = 1024;
+
+#[derive(Debug, Default)]
 pub struct Thread {
     pc: i64,
     stack: Stack,
@@ -12,9 +15,13 @@ pub struct Thread {
 impl Thread {
     pub fn new() -> Self {
         Thread {
-            stack: Stack::new(1024),
+            stack: Stack::new(MAX_RUNTIME_STACK_SIZE),
             ..Default::default()
         }
+    }
+
+    pub fn new_ref() -> Rc<RefCell<Thread>> {
+        Rc::new(RefCell::new(Self::new()))
     }
 
     pub fn pc(&self) -> i64 {
@@ -35,5 +42,13 @@ impl Thread {
 
     pub fn current_frame(&self) -> Rc<RefCell<Frame>> {
         self.stack.top()
+    }
+
+    pub fn new_frame(
+        thread_ref: Rc<RefCell<Thread>>,
+        max_locals: usize,
+        max_stack: usize,
+    ) -> Frame {
+        return Frame::new(thread_ref, max_locals, max_stack);
     }
 }

@@ -6,6 +6,7 @@ use crate::rtda::errors::RuntimeDataAreaError;
 use crate::rtda::local_var::VarRef;
 use crate::rtda::types::ObjectRef;
 
+#[derive(Debug)]
 pub struct OperandStack {
     size: usize,
     vars: Vec<VarRef>,
@@ -63,7 +64,7 @@ impl OperandStack {
     }
 
     pub fn push_long(&mut self, val: i64) {
-        // Long consumes two slots
+        // Long consumes two references
         self.vars[self.size] = VarRef::Num(val as i32);
         self.vars[self.size + 1] = VarRef::Num((val >> 32) as i32);
         self.size += 2;
@@ -97,7 +98,7 @@ impl OperandStack {
     }
 
     pub fn push_double(&mut self, val: f64) {
-        // Double consumes two slots
+        // Double consumes two references
         let bytes = f64::to_be_bytes(val);
         self.push_long(i64::from_be_bytes(bytes));
     }

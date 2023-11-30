@@ -12,6 +12,8 @@
 //!     } local_variable_type_table[local_variable_type_table_length];
 //! }
 
+use crate::classfile::attribute_info::types::AttributeTypeNameEnum;
+use std::any::Any;
 use std::cell::RefCell;
 use std::fmt::{Display, Formatter};
 use std::rc::Rc;
@@ -63,5 +65,13 @@ impl AttributeInfo for LocalVariableTypeTableAttribute {
             });
         }
         self.local_variable_type_table = local_variable_type_table;
+    }
+
+    fn name(&self) -> &str {
+        AttributeTypeNameEnum::LocalVariableTypeTable.into()
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }

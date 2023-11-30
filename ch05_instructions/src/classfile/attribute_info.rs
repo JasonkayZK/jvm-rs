@@ -6,6 +6,7 @@
 //!     u1 info[attribute_length];
 //! }
 
+use std::any::Any;
 use std::cell::RefCell;
 use std::fmt::Display;
 use std::rc::Rc;
@@ -22,26 +23,34 @@ use crate::classfile::attribute_info::local_variable_type_table::LocalVariableTy
 use crate::classfile::attribute_info::markers::{DeprecatedAttribute, SyntheticAttribute};
 use crate::classfile::attribute_info::signature::SignatureAttribute;
 use crate::classfile::attribute_info::source_file::SourceFileAttribute;
+use crate::classfile::attribute_info::types::AttributeTypeNameEnum;
 use crate::classfile::attribute_info::unparsed::UnparsedAttribute;
 use crate::classfile::class_reader::ClassReader;
 use crate::classfile::constant_pool::ConstantPool;
 
-mod bootstrap_methods;
-mod code;
-mod constant_value;
-mod enclosing_method;
-mod exceptions;
-mod inner_classes;
-mod line_number;
-mod local_variable_table;
-mod local_variable_type_table;
-mod markers;
-mod signature;
-mod source_file;
-mod unparsed;
+pub mod bootstrap_methods;
+pub mod code;
+pub mod constant_value;
+pub mod enclosing_method;
+pub mod exceptions;
+pub mod inner_classes;
+pub mod line_number;
+pub mod local_variable_table;
+pub mod local_variable_type_table;
+pub mod markers;
+pub mod signature;
+pub mod source_file;
+mod types;
+pub mod unparsed;
 
 pub trait AttributeInfo: Display {
     fn read_info(&mut self, reader: &mut ClassReader);
+
+    /// Get attribute name
+    fn name(&self) -> &str;
+
+    /// For downcast use
+    fn as_any(&self) -> &dyn Any;
 }
 
 pub fn read_attributes(
@@ -73,20 +82,22 @@ fn new_attribute(
     attr_length: u32,
     cp: Rc<RefCell<ConstantPool>>,
 ) -> Box<dyn AttributeInfo> {
-    match attr_name {
-        "Code" => Box::new(CodeAttribute::new(cp)),
-        "ConstantValue" => Box::new(ConstantValueAttribute::new(cp)),
-        "Deprecated" => Box::<DeprecatedAttribute>::default(),
-        "Exceptions" => Box::new(ExceptionsAttribute::new(cp)),
-        "LineNumberTable" => Box::new(LineNumberTableAttribute::new(cp)),
-        "LocalVariableTable" => Box::new(LocalVariableTableAttribute::new(cp)),
-        "SourceFile" => Box::new(SourceFileAttribute::new(cp)),
-        "Synthetic" => Box::<SyntheticAttribute>::default(),
-        "Signature" => Box::new(SignatureAttribute::new(cp)),
-        "EnclosingMethod" => Box::new(EnclosingMethodAttribute::new(cp)),
-        "BootstrapMethods" => Box::new(BootstrapMethodsAttribute::new(cp)),
-        "InnerClasses" => Box::new(InnerClassesAttribute::new(cp)),
-        "LocalVariableTypeTable" => Box::new(LocalVariableTypeTableAttribute::new(cp)),
+    match attr_name.into() {
+        AttributeTypeNameEnum::Code => Box::new(CodeAttribute::new(cp)),
+        AttributeTypeNameEnum::ConstantValue => Box::new(ConstantValueAttribute::new(cp)),
+        AttributeTypeNameEnum::Deprecated => Box::<DeprecatedAttribute>::default(),
+        AttributeTypeNameEnum::Exceptions => Box::new(ExceptionsAttribute::new(cp)),
+        AttributeTypeNameEnum::LineNumberTable => Box::new(LineNumberTableAttribute::new(cp)),
+        AttributeTypeNameEnum::LocalVariableTable => Box::new(LocalVariableTableAttribute::new(cp)),
+        AttributeTypeNameEnum::SourceFile => Box::new(SourceFileAttribute::new(cp)),
+        AttributeTypeNameEnum::Synthetic => Box::<SyntheticAttribute>::default(),
+        AttributeTypeNameEnum::Signature => Box::new(SignatureAttribute::new(cp)),
+        AttributeTypeNameEnum::EnclosingMethod => Box::new(EnclosingMethodAttribute::new(cp)),
+        AttributeTypeNameEnum::BootstrapMethods => Box::new(BootstrapMethodsAttribute::new(cp)),
+        AttributeTypeNameEnum::InnerClasses => Box::new(InnerClassesAttribute::new(cp)),
+        AttributeTypeNameEnum::LocalVariableTypeTable => {
+            Box::new(LocalVariableTypeTableAttribute::new(cp))
+        }
         _ => Box::new(UnparsedAttribute::new(
             attr_name.to_string(),
             attr_length,

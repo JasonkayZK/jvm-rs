@@ -6,6 +6,7 @@ use crate::cmd::{start_jvm, Cmd};
 pub mod classfile;
 pub mod classpath;
 pub mod cmd;
+pub mod instructions;
 pub mod rtda;
 
 fn main() {

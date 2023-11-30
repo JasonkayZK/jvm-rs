@@ -162,3 +162,31 @@ impl ClassFile {
         }
     }
 }
+
+pub fn print_class_info(class_file: &ClassFile) {
+    println!(
+        "version: {}.{}",
+        class_file.major_version(),
+        class_file.minor_version()
+    );
+    println!(
+        "constants count: {}",
+        class_file.constant_pool().borrow().infos.len()
+    );
+    println!("access flags: 0x{:x}", class_file.access_flags());
+    println!("this class: {}", class_file.class_name());
+    println!("super class: {}", class_file.super_class_name());
+    println!("interfaces: {:?}", class_file.interface_names());
+    println!("fields count: {:?}", class_file.fields().len());
+    for field in class_file.fields() {
+        println!(" {}", field.name());
+    }
+    println!("methods count: {:?}", class_file.methods().len());
+    for method in class_file.methods() {
+        println!(" {}", method.name());
+    }
+    println!("attributes count: {:?}", class_file.attributes().len());
+    for attribute in class_file.attributes() {
+        println!(" {}", attribute);
+    }
+}

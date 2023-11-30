@@ -1,12 +1,13 @@
 use crate::rtda::errors::RuntimeDataAreaError;
 use crate::rtda::types::ObjectRef;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum VarRef {
     Num(i32),
     Ref(ObjectRef),
 }
 
+#[derive(Debug)]
 pub struct LocalVar {
     vars: Vec<VarRef>,
 }
@@ -50,7 +51,7 @@ impl LocalVar {
                     "{}",
                     RuntimeDataAreaError::WrongVarRefType(
                         "Float".to_string(),
-                        "Object".to_string()
+                        "Object".to_string(),
                     )
                 )
             }
@@ -58,7 +59,7 @@ impl LocalVar {
     }
 
     pub fn set_long(&mut self, index: usize, val: i64) {
-        // Long consumes two slots
+        // Long consumes two references
         self.vars[index] = VarRef::Num(val as i32);
         self.vars[index + 1] = VarRef::Num((val >> 32) as i32);
     }
@@ -71,7 +72,7 @@ impl LocalVar {
                 "{}",
                 RuntimeDataAreaError::WrongVarRefType(
                     "LongLowBit".to_string(),
-                    "Object".to_string()
+                    "Object".to_string(),
                 )
             )
         };
@@ -82,7 +83,7 @@ impl LocalVar {
                 "{}",
                 RuntimeDataAreaError::WrongVarRefType(
                     "LongHighBit".to_string(),
-                    "Object".to_string()
+                    "Object".to_string(),
                 )
             )
         };
@@ -90,7 +91,7 @@ impl LocalVar {
     }
 
     pub fn set_double(&mut self, index: usize, val: f64) {
-        // Double consumes two slots
+        // Double consumes two references
         let bytes = f64::to_be_bytes(val);
         let val = i64::from_be_bytes(bytes);
         self.set_long(index, val);

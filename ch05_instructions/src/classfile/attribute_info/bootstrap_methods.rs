@@ -10,10 +10,12 @@
 //!     } bootstrap_methods[num_bootstrap_methods];
 //! }
 
+use std::any::Any;
 use std::cell::RefCell;
 use std::fmt::{Display, Formatter};
 use std::rc::Rc;
 
+use crate::classfile::attribute_info::types::AttributeTypeNameEnum;
 use crate::classfile::constant_pool::ConstantPool;
 
 use super::{AttributeInfo, ClassReader};
@@ -69,5 +71,13 @@ impl AttributeInfo for BootstrapMethodsAttribute {
             });
         }
         self.bootstrap_methods = bootstrap_methods;
+    }
+
+    fn name(&self) -> &str {
+        AttributeTypeNameEnum::BootstrapMethods.into()
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }

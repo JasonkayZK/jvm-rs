@@ -7,6 +7,8 @@
 //!     u2 method_index;
 //! }
 
+use crate::classfile::attribute_info::types::AttributeTypeNameEnum;
+use std::any::Any;
 use std::cell::RefCell;
 use std::fmt::{Display, Formatter};
 use std::rc::Rc;
@@ -37,6 +39,14 @@ impl AttributeInfo for EnclosingMethodAttribute {
     fn read_info(&mut self, reader: &mut ClassReader) {
         self.class_index = reader.read_u16();
         self.method_index = reader.read_u16();
+    }
+
+    fn name(&self) -> &str {
+        AttributeTypeNameEnum::EnclosingMethod.into()
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }
 

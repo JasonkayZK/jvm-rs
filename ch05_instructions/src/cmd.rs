@@ -1,8 +1,10 @@
 use clap::{Args, Parser};
 
-use crate::rtda::frame::Frame;
-use crate::rtda::local_var::LocalVar;
-use crate::rtda::operand_stack::OperandStack;
+use crate::classfile::class_file::ClassFile;
+use crate::classfile::member_info::MemberInfo;
+use crate::classpath::classpath_impl::ClasspathImpl;
+use crate::classpath::entry::Entry;
+use crate::instructions::interpret::interpret;
 
 #[derive(Debug, Parser)]
 #[command(name = "java", version = "0.0.1")]
@@ -31,44 +33,45 @@ pub struct CpArgs {
     pub args: Vec<String>,
 }
 
-pub fn start_jvm(_cp_args: &CpArgs, _xjre_option: &Option<String>) {
-    let mut frame = Frame::new(100, 100);
-    test_local_vars(frame.local_vars_mut());
-    test_operand_stack(frame.operand_stack_mut());
+pub fn start_jvm(cp_args: &CpArgs, xjre_option: &Option<String>) {
+    let mut cp = ClasspathImpl::parse(
+        xjre_option.as_ref().unwrap_or(&String::new()),
+        &cp_args.classpath,
+    );
+
+    println!(
+        "classpath: {} class: {} args: {:?}",
+        cp, cp_args.class, cp_args.args
+    );
+
+    let class_name = cp_args.class.replace('.', "/");
+    let class_file = load_class(&class_name, &mut cp);
+    match get_main_method(&class_file) {
+        Some(member_info) => {
+            interpret(member_info);
+        }
+        None => {
+            println!("Main method not found in class {}", &cp_args.class);
+        }
+    }
 }
 
-fn test_local_vars(local_vars: &mut LocalVar) {
-    local_vars.set_int(0, 100);
-    local_vars.set_int(1, -100);
-    local_vars.set_long(2, 2997924580);
-    local_vars.set_long(4, -2997924580);
-    local_vars.set_float(6, std::f32::consts::PI);
-    local_vars.set_double(7, std::f64::consts::E);
-    local_vars.set_ref(9, None);
+fn load_class(class_name: &str, class_path: &mut ClasspathImpl) -> ClassFile {
+    let class_data = match class_path.read_class(class_name) {
+        Ok(class_data) => class_data,
+        Err(err) => {
+            panic!("Could not find or load main class {}: {}", class_name, err);
+        }
+    };
 
-    println!("{}", local_vars.get_int(0));
-    println!("{}", local_vars.get_int(1));
-    println!("{}", local_vars.get_long(2));
-    println!("{}", local_vars.get_long(4));
-    println!("{}", local_vars.get_float(6));
-    println!("{}", local_vars.get_double(7));
-    println!("{:?}", local_vars.get_ref(9));
+    match ClassFile::parse(class_data) {
+        Ok(class_file) => class_file,
+        Err(err) => panic!("{}", err),
+    }
 }
 
-fn test_operand_stack(operand_stack: &mut OperandStack) {
-    operand_stack.push_int(100);
-    operand_stack.push_int(-100);
-    operand_stack.push_long(2997924580);
-    operand_stack.push_long(-2997924580);
-    operand_stack.push_float(std::f32::consts::PI);
-    operand_stack.push_double(std::f64::consts::E);
-    operand_stack.push_ref(None);
-
-    println!("{:?}", operand_stack.pop_ref());
-    println!("{}", operand_stack.pop_double());
-    println!("{}", operand_stack.pop_float());
-    println!("{}", operand_stack.pop_long());
-    println!("{}", operand_stack.pop_long());
-    println!("{}", operand_stack.pop_int());
-    println!("{}", operand_stack.pop_int());
+fn get_main_method(cf: &ClassFile) -> Option<&MemberInfo> {
+    cf.methods()
+        .iter()
+        .find(|&m| m.name() == "main" && m.descriptor() == "([Ljava/lang/String;)V")
 }

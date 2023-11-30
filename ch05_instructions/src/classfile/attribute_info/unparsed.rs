@@ -6,8 +6,12 @@
 //!     u1 info[attribute_length];
 //! }
 
-use super::{AttributeInfo, ClassReader};
+use std::any::Any;
 use std::fmt::{Display, Formatter};
+
+use crate::classfile::attribute_info::types::AttributeTypeNameEnum;
+
+use super::{AttributeInfo, ClassReader};
 
 pub struct UnparsedAttribute {
     name: String,
@@ -28,6 +32,14 @@ impl Display for UnparsedAttribute {
 impl AttributeInfo for UnparsedAttribute {
     fn read_info(&mut self, reader: &mut ClassReader) {
         self.info = Some(reader.read_bytes(self.length as usize));
+    }
+
+    fn name(&self) -> &str {
+        AttributeTypeNameEnum::Unparsed.into()
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }
 

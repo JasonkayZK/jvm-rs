@@ -6,10 +6,12 @@
 //!     u2 constant_value_index;
 //! }
 
+use std::any::Any;
 use std::cell::RefCell;
 use std::fmt::{Display, Formatter};
 use std::rc::Rc;
 
+use crate::classfile::attribute_info::types::AttributeTypeNameEnum;
 use crate::classfile::constant_pool::ConstantPool;
 
 use super::{AttributeInfo, ClassReader};
@@ -44,5 +46,13 @@ impl Display for ConstantValueAttribute {
 impl AttributeInfo for ConstantValueAttribute {
     fn read_info(&mut self, reader: &mut ClassReader) {
         self.constant_value_index = reader.read_u16();
+    }
+
+    fn name(&self) -> &str {
+        AttributeTypeNameEnum::ConstantValue.into()
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }

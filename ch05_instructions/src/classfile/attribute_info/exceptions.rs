@@ -7,6 +7,8 @@
 //!     u2 exception_index_table[number_of_exceptions];
 //! }
 
+use crate::classfile::attribute_info::types::AttributeTypeNameEnum;
+use std::any::Any;
 use std::cell::RefCell;
 use std::fmt::{Display, Formatter};
 use std::rc::Rc;
@@ -48,5 +50,13 @@ impl Display for ExceptionsAttribute {
 impl AttributeInfo for ExceptionsAttribute {
     fn read_info(&mut self, reader: &mut ClassReader) {
         self.exception_index_table = reader.read_u16s();
+    }
+
+    fn name(&self) -> &str {
+        AttributeTypeNameEnum::Exceptions.into()
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }

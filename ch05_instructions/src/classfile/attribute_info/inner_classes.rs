@@ -1,3 +1,5 @@
+use crate::classfile::attribute_info::types::AttributeTypeNameEnum;
+use std::any::Any;
 /// InnerClass_attribute {
 ///     u2 attribute_name_index;
 ///     u4 attribute_length;
@@ -59,5 +61,13 @@ impl AttributeInfo for InnerClassesAttribute {
             });
         }
         self.classes = classes;
+    }
+
+    fn name(&self) -> &str {
+        AttributeTypeNameEnum::InnerClasses.into()
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }

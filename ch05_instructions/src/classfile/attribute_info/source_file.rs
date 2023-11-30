@@ -6,6 +6,8 @@
 //!     u2 source_file_index;
 //! }
 
+use crate::classfile::attribute_info::types::AttributeTypeNameEnum;
+use std::any::Any;
 use std::cell::RefCell;
 use std::fmt::{Display, Formatter};
 use std::rc::Rc;
@@ -33,6 +35,14 @@ impl Display for SourceFileAttribute {
 impl AttributeInfo for SourceFileAttribute {
     fn read_info(&mut self, reader: &mut ClassReader) {
         self.source_file_index = reader.read_u16();
+    }
+
+    fn name(&self) -> &str {
+        AttributeTypeNameEnum::SourceFile.into()
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }
 

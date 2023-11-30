@@ -17,9 +17,12 @@
 //!     attribute_info attributes[attributes_count];
 //! }
 
+use std::any::Any;
 use std::cell::RefCell;
 use std::fmt::{Display, Formatter};
 use std::rc::Rc;
+
+use crate::classfile::attribute_info::types::AttributeTypeNameEnum;
 
 use super::ConstantPool;
 use super::{AttributeInfo, ClassReader};
@@ -50,6 +53,14 @@ impl AttributeInfo for CodeAttribute {
         self.exception_table = read_exception_table(reader);
         self.attributes = super::read_attributes(reader, self.constant_pool.clone())
     }
+
+    fn name(&self) -> &str {
+        AttributeTypeNameEnum::Code.into()
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
 }
 
 impl CodeAttribute {
@@ -58,6 +69,18 @@ impl CodeAttribute {
             constant_pool: cp,
             ..Default::default()
         }
+    }
+
+    pub fn max_locals(&self) -> u16 {
+        self.max_locals
+    }
+
+    pub fn max_stack(&self) -> u16 {
+        self.max_stack
+    }
+
+    pub fn code(&self) -> Vec<u8> {
+        self.code.clone()
     }
 }
 

@@ -6,6 +6,8 @@
 //! - Synthetic
 
 use super::{AttributeInfo, ClassReader};
+use crate::classfile::attribute_info::types::AttributeTypeNameEnum;
+use std::any::Any;
 use std::fmt::{Display, Formatter};
 
 /// Deprecated_attribute {
@@ -23,6 +25,14 @@ impl Display for DeprecatedAttribute {
 
 impl AttributeInfo for DeprecatedAttribute {
     fn read_info(&mut self, _reader: &mut ClassReader) {}
+
+    fn name(&self) -> &str {
+        AttributeTypeNameEnum::Deprecated.into()
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
 }
 
 /// Synthetic_attribute {
@@ -40,6 +50,14 @@ impl Display for SyntheticAttribute {
 
 impl AttributeInfo for SyntheticAttribute {
     fn read_info(&mut self, _reader: &mut ClassReader) {}
+
+    fn name(&self) -> &str {
+        AttributeTypeNameEnum::Synthetic.into()
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
 }
 
 pub struct MarkerAttribute {}
@@ -52,4 +70,12 @@ impl Display for MarkerAttribute {
 
 impl AttributeInfo for MarkerAttribute {
     fn read_info(&mut self, _reader: &mut ClassReader) {}
+
+    fn name(&self) -> &str {
+        "Marker"
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
 }

@@ -8,6 +8,8 @@
 //!         u2 line_number;
 //!     } line_number_table[line_number_table_length];
 //! }
+use crate::classfile::attribute_info::types::AttributeTypeNameEnum;
+use std::any::Any;
 use std::cell::RefCell;
 use std::fmt::{Display, Formatter};
 use std::rc::Rc;
@@ -71,5 +73,13 @@ impl AttributeInfo for LineNumberTableAttribute {
             });
         }
         self.line_number_table = line_number_table;
+    }
+
+    fn name(&self) -> &str {
+        AttributeTypeNameEnum::LineNumberTable.into()
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }
