@@ -1,4 +1,4 @@
-.PHONY: fmt clippy clean build pack all ci
+.PHONY: fmt clippy fix clean build pack all ci
 
 all: clean fmt clippy pack
 
@@ -9,6 +9,9 @@ fmt:
 
 clippy:
 	cargo clippy --all -- -D warnings
+
+fix:
+	cargo +nightly clippy --all --fix -Z unstable-options --allow-staged
 
 clean:
 	rm -rf ./target && rm -rf ./*/target

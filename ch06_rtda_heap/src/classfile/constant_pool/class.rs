@@ -5,6 +5,7 @@
 //!     u2 name_index;
 //! }
 
+use std::any::Any;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -25,6 +26,10 @@ impl ConstantInfo for ConstantClassInfo {
 
     fn tag(&self) -> u8 {
         CONSTANT_CLASS
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }
 

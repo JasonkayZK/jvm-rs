@@ -1,10 +1,12 @@
-use clap::{Args, Parser};
+use std::cell::RefCell;
+use std::rc::Rc;
 
-use crate::classfile::class_file::ClassFile;
-use crate::classfile::member_info::MemberInfo;
+use clap::{Args, Parser};
+use log::{error, info, warn};
+
 use crate::classpath::classpath_impl::ClasspathImpl;
-use crate::classpath::entry::Entry;
 use crate::instructions::interpret::interpret;
+use crate::rtda::heap::class_loader::ClassLoader;
 
 #[derive(Debug, Parser)]
 #[command(name = "java", version = "0.0.1")]
@@ -34,44 +36,28 @@ pub struct CpArgs {
 }
 
 pub fn start_jvm(cp_args: &CpArgs, xjre_option: &Option<String>) {
-    let mut cp = ClasspathImpl::parse(
+    let cp = ClasspathImpl::parse(
         xjre_option.as_ref().unwrap_or(&String::new()),
         &cp_args.classpath,
     );
 
-    println!(
+    info!(
         "classpath: {} class: {} args: {:?}",
         cp, cp_args.class, cp_args.args
     );
 
+    let class_loader = Rc::new(RefCell::new(ClassLoader::new(cp)));
     let class_name = cp_args.class.replace('.', "/");
-    let class_file = load_class(&class_name, &mut cp);
-    match get_main_method(&class_file) {
-        Some(member_info) => {
-            interpret(member_info);
+    let main_class = class_loader
+        .borrow_mut()
+        .load_class(class_loader.clone(), class_name);
+    let main_method = main_class.borrow_mut().get_main_method();
+    match main_method {
+        Some(member) => {
+            interpret(member);
         }
         None => {
-            println!("Main method not found in class {}", &cp_args.class);
+            error!("Main method not found in class {}", &cp_args.class);
         }
     }
-}
-
-fn load_class(class_name: &str, class_path: &mut ClasspathImpl) -> ClassFile {
-    let class_data = match class_path.read_class(class_name) {
-        Ok(class_data) => class_data,
-        Err(err) => {
-            panic!("Could not find or load main class {}: {}", class_name, err);
-        }
-    };
-
-    match ClassFile::parse(class_data) {
-        Ok(class_file) => class_file,
-        Err(err) => panic!("{}", err),
-    }
-}
-
-fn get_main_method(cf: &ClassFile) -> Option<&MemberInfo> {
-    cf.methods()
-        .iter()
-        .find(|&m| m.name() == "main" && m.descriptor() == "([Ljava/lang/String;)V")
 }

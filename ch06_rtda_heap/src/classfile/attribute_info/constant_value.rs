@@ -29,6 +29,10 @@ impl ConstantValueAttribute {
             ..Default::default()
         }
     }
+
+    pub fn constant_value_index(&self) -> u16 {
+        self.constant_value_index
+    }
 }
 
 impl Display for ConstantValueAttribute {

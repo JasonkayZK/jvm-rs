@@ -6,6 +6,7 @@
 //!     u1 bytes[length];
 //! }
 
+use std::any::Any;
 use std::char::decode_utf16;
 
 use super::{consts, ClassReader, ConstantInfo};
@@ -23,6 +24,10 @@ impl ConstantInfo for ConstantUtf8Info {
     }
     fn tag(&self) -> u8 {
         consts::CONSTANT_UTF8
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }
 

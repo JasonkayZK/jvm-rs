@@ -1,3 +1,4 @@
+use log::info;
 use std::path::Path;
 use std::{env, fmt, fs};
 
@@ -77,7 +78,7 @@ impl ClasspathImpl {
                 }
             }
             Err(err) => {
-                println!("Get environment JAVA_HOME err: {}", err);
+                info!("Get environment JAVA_HOME err: {}", err);
             }
         }
         panic!("{}", "JRE folder not found!")

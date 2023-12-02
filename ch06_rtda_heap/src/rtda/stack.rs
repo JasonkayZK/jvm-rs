@@ -8,7 +8,7 @@ use std::rc::Rc;
 use crate::rtda::errors::RuntimeDataAreaError;
 use crate::rtda::frame::Frame;
 
-#[derive(Debug, Default)]
+#[derive(Default)]
 pub struct Stack {
     max_size: usize,
     top: usize,

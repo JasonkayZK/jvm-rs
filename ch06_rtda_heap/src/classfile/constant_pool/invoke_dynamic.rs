@@ -7,6 +7,7 @@
 //! - CONSTANT_InvokeDynamic
 
 use super::{consts, ClassReader, ConstantInfo};
+use std::any::Any;
 
 /// CONSTANT_MethodType_info {
 ///     u1 tag;
@@ -24,6 +25,10 @@ impl ConstantInfo for ConstantMethodTypeInfo {
 
     fn tag(&self) -> u8 {
         consts::CONSTANT_METHOD_TYPE
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }
 
@@ -47,6 +52,10 @@ impl ConstantInfo for ConstantMethodHandleInfo {
     fn tag(&self) -> u8 {
         consts::CONSTANT_METHOD_HANDLE
     }
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
 }
 
 /// CONSTANT_InvokeDynamic_info {
@@ -68,5 +77,9 @@ impl ConstantInfo for ConstantInvokeDynamicInfo {
 
     fn tag(&self) -> u8 {
         consts::CONSTANT_INVOKE_DYNAMIC
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }

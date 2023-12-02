@@ -4,6 +4,7 @@
 //!     u1 tag;
 //!     u2 string_index;
 //! }
+use std::any::Any;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -24,6 +25,10 @@ impl ConstantInfo for ConstantStringInfo {
     fn tag(&self) -> u8 {
         CONSTANT_STRING
     }
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
 }
 
 impl ConstantStringInfo {
@@ -32,5 +37,9 @@ impl ConstantStringInfo {
             constant_pool: cp,
             string_index: 0,
         }
+    }
+
+    pub fn get_string(&self) -> String {
+        self.constant_pool.borrow().get_utf8(self.string_index)
     }
 }

@@ -1,13 +1,12 @@
 use crate::rtda::errors::RuntimeDataAreaError;
-use crate::rtda::types::ObjectRef;
+use crate::types::ObjectRef;
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub enum VarRef {
     Num(i32),
     Ref(ObjectRef),
 }
 
-#[derive(Debug)]
 pub struct LocalVar {
     vars: Vec<VarRef>,
 }
@@ -107,14 +106,14 @@ impl LocalVar {
     }
 
     pub fn get_ref(&self, index: usize) -> ObjectRef {
-        match self.vars[index] {
+        match &self.vars[index] {
             VarRef::Num(_) => {
                 panic!(
                     "{}",
                     RuntimeDataAreaError::WrongVarRefType("Object".to_string(), "Num".to_string())
                 )
             }
-            VarRef::Ref(obj_ref) => obj_ref,
+            VarRef::Ref(obj_ref) => obj_ref.clone(),
         }
     }
 }

@@ -4,9 +4,8 @@
 
 use crate::rtda::errors::RuntimeDataAreaError;
 use crate::rtda::local_var::VarRef;
-use crate::rtda::types::ObjectRef;
+use crate::types::ObjectRef;
 
-#[derive(Debug)]
 pub struct OperandStack {
     size: usize,
     vars: Vec<VarRef>,
@@ -56,7 +55,7 @@ impl OperandStack {
                     "{}",
                     RuntimeDataAreaError::WrongVarRefType(
                         "Float".to_string(),
-                        "Object".to_string()
+                        "Object".to_string(),
                     )
                 )
             }
@@ -79,7 +78,7 @@ impl OperandStack {
                 "{}",
                 RuntimeDataAreaError::WrongVarRefType(
                     "LongLowBit".to_string(),
-                    "Object".to_string()
+                    "Object".to_string(),
                 )
             )
         };
@@ -90,7 +89,7 @@ impl OperandStack {
                 "{}",
                 RuntimeDataAreaError::WrongVarRefType(
                     "LongHighBit".to_string(),
-                    "Object".to_string()
+                    "Object".to_string(),
                 )
             )
         };
@@ -115,14 +114,14 @@ impl OperandStack {
 
     pub fn pop_ref(&mut self) -> ObjectRef {
         self.size -= 1;
-        match self.vars[self.size] {
+        match &self.vars[self.size] {
             VarRef::Num(_) => {
                 panic!(
                     "{}",
                     RuntimeDataAreaError::WrongVarRefType("Object".to_string(), "Num".to_string())
                 )
             }
-            VarRef::Ref(obj_ref) => obj_ref,
+            VarRef::Ref(obj_ref) => obj_ref.clone(),
         }
     }
 }

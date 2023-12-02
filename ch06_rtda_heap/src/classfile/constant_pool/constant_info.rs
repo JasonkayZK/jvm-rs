@@ -6,4 +6,6 @@ pub trait ConstantInfo {
 
     /// Get tag
     fn tag(&self) -> u8;
+
+    fn as_any(&self) -> &dyn std::any::Any;
 }

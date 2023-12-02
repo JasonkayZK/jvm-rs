@@ -1,6 +1,11 @@
 use std::result::Result;
 
 use crate::instructions::base::Instruction;
+use crate::instructions::constants::ldc::{LDC, LDC2_W, LDC_W};
+use crate::instructions::references::{
+    CHECK_CAST, GET_FIELD, GET_STATIC, INSTANCE_OF, INVOKE_SPECIAL, INVOKE_VIRTUAL, NEW, PUT_FIELD,
+    PUT_STATIC,
+};
 
 use super::comparisons::*;
 use super::constants::*;
@@ -32,15 +37,9 @@ pub fn new_instruction(opcode: u8) -> Result<Box<dyn Instruction>, String> {
         0x0f => Box::<DCONST_1>::default(),
         0x10 => Box::<BIPUSH>::default(),
         0x11 => Box::<SIPUSH>::default(),
-        // 0x12 => {
-        //     Box::new(LDC::default())
-        // },
-        // 0x13 => {
-        //     Box::new(LDC_W::default())
-        // },
-        // 0x14 => {
-        //     Box::new(LDC2_W::default())
-        // },
+        0x12 => Box::<LDC>::default(),
+        0x13 => Box::<LDC_W>::default(),
+        0x14 => Box::<LDC2_W>::default(),
         0x15 => Box::<ILOAD>::default(),
         0x16 => Box::<LLOAD>::default(),
         0x17 => Box::<FLOAD>::default(),
@@ -246,24 +245,12 @@ pub fn new_instruction(opcode: u8) -> Result<Box<dyn Instruction>, String> {
         // 0xb1 => {
         //     Box::new(_RETURN::default())
         // },
-        // 0xb2 => {
-        //     Box::new(GET_STATIC::default())
-        // },
-        // 0xb3 => {
-        //     Box::new(PUT_STATIC::default())
-        // },
-        // 0xb4 => {
-        //     Box::new(GET_FIELD::default())
-        // },
-        // 0xb5 => {
-        //     Box::new(PUT_FIELD::default())
-        // },
-        // 0xb6 => {
-        //     Box::new(INVOKE_VIRTUAL::default())
-        // },
-        // 0xb7 => {
-        //     Box::new(INVOKE_SPECIAL::default())
-        // },
+        0xb2 => Box::<GET_STATIC>::default(),
+        0xb3 => Box::<PUT_STATIC>::default(),
+        0xb4 => Box::<GET_FIELD>::default(),
+        0xb5 => Box::<PUT_FIELD>::default(),
+        0xb6 => Box::<INVOKE_VIRTUAL>::default(),
+        0xb7 => Box::<INVOKE_SPECIAL>::default(),
         // 0xb8 => {
         //     Box::new(INVOKE_STATIC::default())
         // },
@@ -273,9 +260,7 @@ pub fn new_instruction(opcode: u8) -> Result<Box<dyn Instruction>, String> {
         // 0xba => {
         //     Box::new(INVOKE_DYNAMIC::default())
         // },
-        // 0xbb => {
-        //     Box::new(NEW::default())
-        // },
+        0xbb => Box::<NEW>::default(),
         // 0xbc => {
         //     Box::new(NEW_ARRAY::default())
         // },
@@ -288,12 +273,8 @@ pub fn new_instruction(opcode: u8) -> Result<Box<dyn Instruction>, String> {
         // 0xbf => {
         //     Box::new(ATHROW::default())
         // },
-        // 0xc0 => {
-        //     Box::new(CHECK_CAST::default())
-        // },
-        // 0xc1 => {
-        //     Box::new(INSTANCE_OF::default())
-        // },
+        0xc0 => Box::<CHECK_CAST>::default(),
+        0xc1 => Box::<INSTANCE_OF>::default(),
         // 0xc2 => {
         //     Box::new(MONITORENTER::default())
         // },

@@ -9,6 +9,7 @@
 //!
 
 use super::{consts, ClassReader, ConstantInfo};
+use std::any::Any;
 
 /// CONSTANT_Integer_info {
 ///     u1 tag;
@@ -26,6 +27,10 @@ impl ConstantInfo for ConstantIntegerInfo {
 
     fn tag(&self) -> u8 {
         consts::CONSTANT_INTEGER
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }
 
@@ -51,6 +56,10 @@ impl ConstantInfo for ConstantFloatInfo {
 
     fn tag(&self) -> u8 {
         consts::CONSTANT_FLOAT
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }
 
@@ -78,6 +87,10 @@ impl ConstantInfo for ConstantLongInfo {
     fn tag(&self) -> u8 {
         consts::CONSTANT_LONG
     }
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
 }
 
 impl ConstantLongInfo {
@@ -103,6 +116,10 @@ impl ConstantInfo for ConstantDoubleInfo {
 
     fn tag(&self) -> u8 {
         consts::CONSTANT_DOUBLE
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }
 

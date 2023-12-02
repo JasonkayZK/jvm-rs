@@ -1,3 +1,4 @@
+use log::warn;
 use std::fmt;
 
 use crate::classpath::entry::{new_entry, Entry, PATH_SEPARATOR};
@@ -27,7 +28,7 @@ impl Entry for CompositeEntry {
                     return Ok(data);
                 }
                 Err(err) => {
-                    println!("Warning: reading class err: {}", err);
+                    warn!("Warning: reading class err: {}", err);
                 }
             }
         }

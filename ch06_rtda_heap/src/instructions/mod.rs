@@ -9,5 +9,6 @@ pub mod factory;
 pub mod interpret;
 pub mod loads;
 pub mod math;
+pub mod references;
 pub mod stack;
 pub mod stores;

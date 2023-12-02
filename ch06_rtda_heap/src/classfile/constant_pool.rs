@@ -18,15 +18,15 @@ use crate::classfile::constant_pool::numeric::{
 use crate::classfile::constant_pool::string::ConstantStringInfo;
 use crate::classfile::constant_pool::utf8::ConstantUtf8Info;
 
-mod class;
-mod constant_info;
-mod consts;
-mod invoke_dynamic;
-mod member_ref;
-mod name_and_type;
-mod numeric;
-mod string;
-mod utf8;
+pub mod class;
+pub mod constant_info;
+pub mod consts;
+pub mod invoke_dynamic;
+pub mod member_ref;
+pub mod name_and_type;
+pub mod numeric;
+pub mod string;
+pub mod utf8;
 
 #[derive(Default)]
 pub struct ConstantPool {
@@ -51,6 +51,35 @@ impl ConstantPool {
             Some(info) => info.str(),
             None => "".to_string(),
         }
+    }
+
+    pub fn get_name_and_type(&self, index: usize) -> (String, String) {
+        let info = self.get_constant_info(index).as_ref().unwrap();
+        let name_type_info = info
+            .as_any()
+            .downcast_ref::<ConstantNameAndTypeInfo>()
+            .unwrap();
+        (
+            self.get_utf8(name_type_info.name_index()),
+            self.get_utf8(name_type_info.descriptor_index()),
+        )
+    }
+
+    pub fn put_constant_info(&mut self, info: Option<Box<dyn ConstantInfo>>) {
+        self.infos.push(info);
+    }
+
+    pub fn get_constant_info(&self, index: usize) -> &Option<Box<dyn ConstantInfo>> {
+        match self.infos.get(index) {
+            Some(info) => info,
+            None => {
+                panic!("Invalid constant pool index: {}!", index)
+            }
+        }
+    }
+
+    pub fn constant_len(&self) -> usize {
+        self.infos.len()
     }
 }
 

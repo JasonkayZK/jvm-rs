@@ -1,6 +1,8 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
+use log::info;
+
 use crate::classfile::attribute_info::{read_attributes, AttributeInfo};
 use crate::classfile::class_reader::ClassReader;
 use crate::classfile::constant_pool::{read_constant_pool, ConstantPool};
@@ -164,29 +166,29 @@ impl ClassFile {
 }
 
 pub fn print_class_info(class_file: &ClassFile) {
-    println!(
+    info!(
         "version: {}.{}",
         class_file.major_version(),
         class_file.minor_version()
     );
-    println!(
+    info!(
         "constants count: {}",
         class_file.constant_pool().borrow().infos.len()
     );
-    println!("access flags: 0x{:x}", class_file.access_flags());
-    println!("this class: {}", class_file.class_name());
-    println!("super class: {}", class_file.super_class_name());
-    println!("interfaces: {:?}", class_file.interface_names());
-    println!("fields count: {:?}", class_file.fields().len());
+    info!("access flags: 0x{:x}", class_file.access_flags());
+    info!("this class: {}", class_file.class_name());
+    info!("super class: {}", class_file.super_class_name());
+    info!("interfaces: {:?}", class_file.interface_names());
+    info!("fields count: {:?}", class_file.fields().len());
     for field in class_file.fields() {
-        println!(" {}", field.name());
+        info!(" {}", field.name());
     }
-    println!("methods count: {:?}", class_file.methods().len());
+    info!("methods count: {:?}", class_file.methods().len());
     for method in class_file.methods() {
-        println!(" {}", method.name());
+        info!(" {}", method.name());
     }
-    println!("attributes count: {:?}", class_file.attributes().len());
+    info!("attributes count: {:?}", class_file.attributes().len());
     for attribute in class_file.attributes() {
-        println!(" {}", attribute);
+        info!(" {}", attribute);
     }
 }

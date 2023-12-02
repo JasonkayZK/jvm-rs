@@ -40,7 +40,7 @@ pub mod local_variable_type_table;
 pub mod markers;
 pub mod signature;
 pub mod source_file;
-mod types;
+pub mod types;
 pub mod unparsed;
 
 pub trait AttributeInfo: Display {

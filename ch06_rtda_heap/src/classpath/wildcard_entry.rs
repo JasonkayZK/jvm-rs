@@ -1,5 +1,7 @@
 use std::{fmt, fs};
 
+use log::warn;
+
 use crate::classpath::entry::{Entry, PATH_SEPARATOR};
 use crate::classpath::errors::EntryError;
 use crate::classpath::zip_entry::ZipEntry;
@@ -46,7 +48,7 @@ impl Entry for WildcardEntry {
                     return Ok(data);
                 }
                 Err(err) => {
-                    println!("Warning: reading class err: {}", err);
+                    warn!("Warning: reading class err: {}", err);
                 }
             }
         }

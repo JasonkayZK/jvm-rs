@@ -6,6 +6,8 @@
 //!     u2 descriptor_index;
 //! }
 
+use std::any::Any;
+
 use crate::classfile::constant_pool::consts::CONSTANT_NAME_AND_TYPE;
 
 use super::{ClassReader, ConstantInfo};
@@ -16,6 +18,16 @@ pub struct ConstantNameAndTypeInfo {
     descriptor_index: u16,
 }
 
+impl ConstantNameAndTypeInfo {
+    pub fn name_index(&self) -> u16 {
+        self.name_index
+    }
+
+    pub fn descriptor_index(&self) -> u16 {
+        self.descriptor_index
+    }
+}
+
 impl ConstantInfo for ConstantNameAndTypeInfo {
     fn read_info(&mut self, reader: &mut ClassReader) {
         self.name_index = reader.read_u16();
@@ -24,5 +36,9 @@ impl ConstantInfo for ConstantNameAndTypeInfo {
 
     fn tag(&self) -> u8 {
         CONSTANT_NAME_AND_TYPE
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }

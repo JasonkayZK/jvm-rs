@@ -25,6 +25,8 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use crate::classfile::attribute_info::code::CodeAttribute;
+use crate::classfile::attribute_info::constant_value::ConstantValueAttribute;
+use crate::classfile::attribute_info::types::AttributeTypeNameEnum;
 use crate::classfile::attribute_info::{read_attributes, AttributeInfo};
 use crate::classfile::class_reader::ClassReader;
 use crate::classfile::constant_pool::ConstantPool;
@@ -73,8 +75,17 @@ impl MemberInfo {
 
     pub fn code_attribute(&self) -> Option<&CodeAttribute> {
         for attr in &self.attributes {
-            if attr.name() == "Code" {
+            if attr.name().eq(AttributeTypeNameEnum::Code.into()) {
                 return attr.as_any().downcast_ref::<CodeAttribute>();
+            }
+        }
+        None
+    }
+
+    pub fn constant_value_attribute(&self) -> Option<&ConstantValueAttribute> {
+        for attr in &self.attributes {
+            if attr.name().eq(AttributeTypeNameEnum::ConstantValue.into()) {
+                return attr.as_any().downcast_ref::<ConstantValueAttribute>();
             }
         }
         None
