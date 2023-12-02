@@ -29,7 +29,7 @@ impl Instruction for INVOKE_VIRTUAL {
             .downcast_ref::<MethodRef>()
             .unwrap();
 
-        if method_ref.name() == "info" {
+        if method_ref.name() == "println" {
             let stack = frame.operand_stack_mut();
             let descriptor = method_ref.descriptor();
             if descriptor == "(Z)V" {
