@@ -48,7 +48,7 @@ impl Entry for WildcardEntry {
                     return Ok(data);
                 }
                 Err(err) => {
-                    warn!("Warning: reading class err: {}", err);
+                    // warn!("Warning: reading class err: {}", err);
                 }
             }
         }

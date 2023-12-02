@@ -2,9 +2,9 @@
 //!
 //! Operand Stack stores the temporary values during the function call
 
-use crate::rtda::errors::RuntimeDataAreaError;
 use crate::rtda::local_var::VarRef;
-use crate::types::ObjectRef;
+use crate::rtda::object::Object;
+use crate::types::{ObjectRef, OptionRcRefCell};
 
 pub struct OperandStack {
     size: usize,
@@ -28,12 +28,7 @@ impl OperandStack {
         self.size -= 1;
         match self.vars[self.size] {
             VarRef::Num(val) => val,
-            VarRef::Ref(_) => {
-                panic!(
-                    "{}",
-                    RuntimeDataAreaError::WrongVarRefType("Int".to_string(), "Object".to_string())
-                )
-            }
+            VarRef::Ref(_) => 0,
         }
     }
 
@@ -50,15 +45,7 @@ impl OperandStack {
                 let bytes = i32::to_be_bytes(num);
                 f32::from_be_bytes(bytes)
             }
-            VarRef::Ref(_) => {
-                panic!(
-                    "{}",
-                    RuntimeDataAreaError::WrongVarRefType(
-                        "Float".to_string(),
-                        "Object".to_string(),
-                    )
-                )
-            }
+            VarRef::Ref(_) => 0.0,
         }
     }
 
@@ -74,24 +61,12 @@ impl OperandStack {
         let low = if let VarRef::Num(low) = self.vars[self.size] {
             low as u32
         } else {
-            panic!(
-                "{}",
-                RuntimeDataAreaError::WrongVarRefType(
-                    "LongLowBit".to_string(),
-                    "Object".to_string(),
-                )
-            )
+            0
         };
         let high = if let VarRef::Num(high) = self.vars[self.size + 1] {
             high as u32
         } else {
-            panic!(
-                "{}",
-                RuntimeDataAreaError::WrongVarRefType(
-                    "LongHighBit".to_string(),
-                    "Object".to_string(),
-                )
-            )
+            0
         };
         (high as i64) << 32 | low as i64
     }
@@ -115,13 +90,25 @@ impl OperandStack {
     pub fn pop_ref(&mut self) -> ObjectRef {
         self.size -= 1;
         match &self.vars[self.size] {
-            VarRef::Num(_) => {
-                panic!(
-                    "{}",
-                    RuntimeDataAreaError::WrongVarRefType("Object".to_string(), "Num".to_string())
-                )
-            }
+            VarRef::Num(_) => None,
             VarRef::Ref(obj_ref) => obj_ref.clone(),
         }
+    }
+
+    pub fn get_ref_from_top(&self, n: usize) -> OptionRcRefCell<Object> {
+        match self.vars[self.size - n - 1].clone() {
+            VarRef::Num(_) => None,
+            VarRef::Ref(obj_ref) => obj_ref,
+        }
+    }
+
+    pub fn push_var(&mut self, slot: VarRef) {
+        self.vars[self.size] = slot;
+        self.size += 1;
+    }
+
+    pub fn pop_var(&mut self) -> VarRef {
+        self.size -= 1;
+        self.vars[self.size].clone()
     }
 }

@@ -1,4 +1,3 @@
-use crate::rtda::errors::RuntimeDataAreaError;
 use crate::rtda::types::ObjectRef;
 
 #[derive(Clone)]
@@ -25,12 +24,7 @@ impl LocalVar {
     pub fn get_int(&self, index: usize) -> i32 {
         match self.vars[index] {
             VarRef::Num(val) => val,
-            VarRef::Ref(_) => {
-                panic!(
-                    "{}",
-                    RuntimeDataAreaError::WrongVarRefType("Int".to_string(), "Object".to_string())
-                )
-            }
+            VarRef::Ref(_) => 0,
         }
     }
 
@@ -45,20 +39,12 @@ impl LocalVar {
                 let bytes = i32::to_be_bytes(num);
                 f32::from_be_bytes(bytes)
             }
-            VarRef::Ref(_) => {
-                panic!(
-                    "{}",
-                    RuntimeDataAreaError::WrongVarRefType(
-                        "Float".to_string(),
-                        "Object".to_string()
-                    )
-                )
-            }
+            VarRef::Ref(_) => 0.0,
         }
     }
 
     pub fn set_long(&mut self, index: usize, val: i64) {
-        // Long consumes two slots
+        // Long consumes two references
         self.vars[index] = VarRef::Num(val as i32);
         self.vars[index + 1] = VarRef::Num((val >> 32) as i32);
     }
@@ -67,30 +53,18 @@ impl LocalVar {
         let low = if let VarRef::Num(low) = self.vars[index] {
             low as u32
         } else {
-            panic!(
-                "{}",
-                RuntimeDataAreaError::WrongVarRefType(
-                    "LongLowBit".to_string(),
-                    "Object".to_string()
-                )
-            )
+            0
         };
         let high = if let VarRef::Num(high) = self.vars[index + 1] {
             high as u32
         } else {
-            panic!(
-                "{}",
-                RuntimeDataAreaError::WrongVarRefType(
-                    "LongHighBit".to_string(),
-                    "Object".to_string()
-                )
-            )
+            0
         };
         (high as i64) << 32 | low as i64
     }
 
     pub fn set_double(&mut self, index: usize, val: f64) {
-        // Double consumes two slots
+        // Double consumes two references
         let bytes = f64::to_be_bytes(val);
         let val = i64::from_be_bytes(bytes);
         self.set_long(index, val);
@@ -106,14 +80,13 @@ impl LocalVar {
     }
 
     pub fn get_ref(&self, index: usize) -> ObjectRef {
-        match self.vars[index] {
-            VarRef::Num(_) => {
-                panic!(
-                    "{}",
-                    RuntimeDataAreaError::WrongVarRefType("Object".to_string(), "Num".to_string())
-                )
-            }
-            VarRef::Ref(obj_ref) => obj_ref,
+        match &self.vars[index] {
+            VarRef::Num(_) => None,
+            VarRef::Ref(obj_ref) => obj_ref.clone(),
         }
+    }
+
+    pub fn set_var(&mut self, index: usize, var: VarRef) {
+        self.vars[index] = var;
     }
 }

@@ -1,10 +1,12 @@
 #![allow(non_camel_case_types)]
 
 use crate::instructions::base::bytecode_reader::BytecodeReader;
-use crate::instructions::base::Instruction;
+use crate::instructions::base::{invoke_method, Instruction};
+use crate::instructions::errors::InstructionError;
 use crate::rtda::frame::Frame;
+use crate::rtda::heap::method_lookup::lookup_method_in_class;
 use crate::rtda::heap::method_ref::MethodRef;
-use log::info;
+use crate::rtda::operand_stack::OperandStack;
 
 /// Invoke instance method; dispatch based on class
 #[derive(Default, Debug)]
@@ -17,39 +19,99 @@ impl Instruction for INVOKE_VIRTUAL {
         self.index = reader.read_u16() as u64;
     }
 
-    /// Hack!
     fn execute(&mut self, frame: &mut Frame) {
-        let current_method = frame.method();
-        let current_class = current_method.borrow().get_class();
+        let current_class = frame.method().borrow().get_class();
         let r_cp = current_class.borrow().constant_pool();
-        let cp = r_cp.borrow();
-        let method_ref = cp
-            .get_constant(self.index as usize)
-            .as_any()
-            .downcast_ref::<MethodRef>()
-            .unwrap();
+        let resolved_method = r_cp
+            .borrow_mut()
+            .get_constant_mut(self.index as usize)
+            .as_any_mut()
+            .downcast_mut::<MethodRef>()
+            .unwrap()
+            .resolved_method(current_class.clone());
 
-        if method_ref.name() == "println" {
-            let stack = frame.operand_stack_mut();
-            let descriptor = method_ref.descriptor();
-            if descriptor == "(Z)V" {
-                info!("{}", stack.pop_int() != 0);
-            } else if descriptor == "(C)V"
-                || descriptor == "(I)V"
-                || descriptor == "(B)V"
-                || descriptor == "(S)V"
-            {
-                info!("{}", stack.pop_int());
-            } else if descriptor == "(F)V" {
-                info!("{}", stack.pop_float());
-            } else if descriptor == "(J)V" {
-                info!("{}", stack.pop_long());
-            } else if descriptor == "(D)V" {
-                info!("{}", stack.pop_double());
-            } else {
-                panic!("info: {}", descriptor);
-            }
-            stack.pop_ref();
+        if resolved_method.borrow().is_static() {
+            panic!("{}", InstructionError::IncompatibleClassChangeError);
         }
+
+        let _ref = frame
+            .operand_stack_mut()
+            .get_ref_from_top((resolved_method.borrow().arg_object_ref_count() - 1) as usize);
+        if _ref.is_none() {
+            if resolved_method.borrow().name() == "println" {
+                // Hack!
+                println(
+                    frame.operand_stack_mut(),
+                    resolved_method.borrow().descriptor(),
+                );
+                return;
+            }
+
+            panic!("{}", InstructionError::NullPointerException);
+        }
+
+        if resolved_method.borrow().is_protected()
+            && resolved_method
+                .borrow()
+                .get_class()
+                .borrow()
+                .is_sub_class_of(&current_class)
+            && resolved_method
+                .borrow()
+                .get_class()
+                .borrow()
+                .get_package_name()
+                != current_class.borrow().get_package_name()
+            && _ref.as_ref().unwrap().borrow().class().ne(&current_class)
+            && !_ref
+                .as_ref()
+                .unwrap()
+                .borrow()
+                .class()
+                .borrow()
+                .is_sub_class_of(&current_class)
+        {
+            panic!("{}", InstructionError::IllegalAccessError);
+        }
+
+        let method_to_be_invoked = lookup_method_in_class(
+            _ref.as_ref().unwrap().borrow().class(),
+            resolved_method.borrow().name(),
+            resolved_method.borrow().descriptor(),
+        );
+
+        if method_to_be_invoked.is_none()
+            || method_to_be_invoked
+                .as_ref()
+                .unwrap()
+                .borrow()
+                .is_abstract()
+        {
+            panic!("{}", InstructionError::AbstractMethodError);
+        }
+
+        invoke_method(frame, method_to_be_invoked.as_ref().unwrap());
     }
+}
+
+/// Hack!
+fn println(stack: &mut OperandStack, descriptor: String) {
+    if descriptor == "(Z)V" {
+        println!("{}", stack.pop_int() != 0);
+    } else if descriptor == "(C)V"
+        || descriptor == "(I)V"
+        || descriptor == "(B)V"
+        || descriptor == "(S)V"
+    {
+        println!("{}", stack.pop_int());
+    } else if descriptor == "(F)V" {
+        println!("{}", stack.pop_float());
+    } else if descriptor == "(J)V" {
+        println!("{}", stack.pop_long());
+    } else if descriptor == "(D)V" {
+        println!("{}", stack.pop_double());
+    } else {
+        panic!("println: {}", descriptor);
+    }
+    stack.pop_ref();
 }

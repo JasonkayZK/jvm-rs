@@ -17,7 +17,5 @@ fn main() {
     let cmd = Cmd::parse();
     logger::init(Some(LogLevel::Debug));
 
-    if let Some(cp_args) = cmd.cp {
-        start_jvm(&cp_args, &cmd.xjre);
-    }
+    start_jvm(cmd);
 }

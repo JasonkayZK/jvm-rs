@@ -46,6 +46,14 @@ impl Thread {
         self.stack.top()
     }
 
+    pub fn top_frame(&mut self) -> RcRefCell<Frame> {
+        self.stack.top()
+    }
+
+    pub fn is_stack_empty(&self) -> bool {
+        self.stack.is_empty()
+    }
+
     pub fn new_frame(thread_ref: Rc<RefCell<Thread>>, method: RcRefCell<Method>) -> Frame {
         Frame::new(thread_ref, method)
     }

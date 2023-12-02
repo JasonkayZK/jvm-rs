@@ -10,4 +10,13 @@ pub enum RuntimeDataAreaError {
 
     #[error("jvm stack is empty!")]
     StackEmpty,
+
+    #[error("java.lang.IncompatibleClassChangeError")]
+    IncompatibleClassChange,
+
+    #[error("java.lang.NoSuchMethodError")]
+    NoSuchMethod,
+
+    #[error("java.lang.IllegalAccessError")]
+    IllegalAccessError,
 }

@@ -27,9 +27,9 @@ impl Instruction for SWAP {
     /// [...][c][a][b]
     fn execute(&mut self, frame: &mut Frame) {
         let stack = frame.operand_stack_mut();
-        let reference1 = stack.pop_ref();
-        let reference2 = stack.pop_ref();
-        stack.push_ref(reference1);
-        stack.push_ref(reference2);
+        let reference1 = stack.pop_var();
+        let reference2 = stack.pop_var();
+        stack.push_var(reference1);
+        stack.push_var(reference2);
     }
 }

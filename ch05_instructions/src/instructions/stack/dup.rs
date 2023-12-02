@@ -16,10 +16,10 @@ impl Instruction for DUP {
     /// [...][c][b][a][a]
     fn execute(&mut self, frame: &mut Frame) {
         let stack = frame.operand_stack_mut();
-        let reference = stack.pop_ref();
-        let reference2 = reference;
-        stack.push_ref(reference);
-        stack.push_ref(reference2);
+        let reference = stack.pop_var();
+        let reference2 = reference.clone();
+        stack.push_var(reference);
+        stack.push_var(reference2);
     }
 }
 
@@ -36,11 +36,11 @@ impl Instruction for DUP_X1 {
     /// [...][c][a][b][a]
     fn execute(&mut self, frame: &mut Frame) {
         let stack = frame.operand_stack_mut();
-        let reference1 = stack.pop_ref();
-        let reference2 = stack.pop_ref();
-        stack.push_ref(reference1);
-        stack.push_ref(reference2);
-        stack.push_ref(reference1);
+        let reference1 = stack.pop_var();
+        let reference2 = stack.pop_var();
+        stack.push_var(reference1.clone());
+        stack.push_var(reference2);
+        stack.push_var(reference1);
     }
 }
 
@@ -57,13 +57,13 @@ impl Instruction for DUP_X2 {
     /// [...][a][c][b][a]
     fn execute(&mut self, frame: &mut Frame) {
         let stack = frame.operand_stack_mut();
-        let reference1 = stack.pop_ref();
-        let reference2 = stack.pop_ref();
-        let reference3 = stack.pop_ref();
-        stack.push_ref(reference1);
-        stack.push_ref(reference3);
-        stack.push_ref(reference2);
-        stack.push_ref(reference1);
+        let reference1 = stack.pop_var();
+        let reference2 = stack.pop_var();
+        let reference3 = stack.pop_var();
+        stack.push_var(reference1.clone());
+        stack.push_var(reference3);
+        stack.push_var(reference2);
+        stack.push_var(reference1);
     }
 }
 
@@ -80,12 +80,12 @@ impl Instruction for DUP2 {
     /// [...][c][b][a][b][a]
     fn execute(&mut self, frame: &mut Frame) {
         let stack = frame.operand_stack_mut();
-        let reference1 = stack.pop_ref();
-        let reference2 = stack.pop_ref();
-        stack.push_ref(reference2);
-        stack.push_ref(reference1);
-        stack.push_ref(reference2);
-        stack.push_ref(reference1);
+        let reference1 = stack.pop_var();
+        let reference2 = stack.pop_var();
+        stack.push_var(reference2.clone());
+        stack.push_var(reference1.clone());
+        stack.push_var(reference2);
+        stack.push_var(reference1);
     }
 }
 
@@ -102,14 +102,14 @@ impl Instruction for DUP2_X1 {
     /// [...][b][a][c][b][a]
     fn execute(&mut self, frame: &mut Frame) {
         let stack = frame.operand_stack_mut();
-        let reference1 = stack.pop_ref();
-        let reference2 = stack.pop_ref();
-        let reference3 = stack.pop_ref();
-        stack.push_ref(reference2);
-        stack.push_ref(reference1);
-        stack.push_ref(reference3);
-        stack.push_ref(reference2);
-        stack.push_ref(reference1);
+        let reference1 = stack.pop_var();
+        let reference2 = stack.pop_var();
+        let reference3 = stack.pop_var();
+        stack.push_var(reference2.clone());
+        stack.push_var(reference1.clone());
+        stack.push_var(reference3);
+        stack.push_var(reference2);
+        stack.push_var(reference1);
     }
 }
 
@@ -126,15 +126,15 @@ impl Instruction for DUP2_X2 {
     /// [...][b][a][d][c][b][a]
     fn execute(&mut self, frame: &mut Frame) {
         let stack = frame.operand_stack_mut();
-        let reference1 = stack.pop_ref();
-        let reference2 = stack.pop_ref();
-        let reference3 = stack.pop_ref();
-        let reference4 = stack.pop_ref();
-        stack.push_ref(reference2);
-        stack.push_ref(reference1);
-        stack.push_ref(reference4);
-        stack.push_ref(reference3);
-        stack.push_ref(reference2);
-        stack.push_ref(reference1);
+        let reference1 = stack.pop_var();
+        let reference2 = stack.pop_var();
+        let reference3 = stack.pop_var();
+        let reference4 = stack.pop_var();
+        stack.push_var(reference2.clone());
+        stack.push_var(reference1.clone());
+        stack.push_var(reference4);
+        stack.push_var(reference3);
+        stack.push_var(reference2);
+        stack.push_var(reference1);
     }
 }

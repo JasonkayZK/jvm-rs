@@ -22,13 +22,16 @@ pub struct ClassLoader {
     classpath: ClasspathImpl,
     // 保存加载的类，key 为类的完全限定名
     class_map: HashMap<String, RcRefCell<Class>>,
+    // Verbose the class information
+    verbose_flag: bool,
 }
 
 impl ClassLoader {
-    pub fn new(classpath: ClasspathImpl) -> Self {
+    pub fn new(classpath: ClasspathImpl, verbose_flag: bool) -> Self {
         ClassLoader {
             classpath,
             class_map: HashMap::new(),
+            verbose_flag,
         }
     }
 
@@ -60,7 +63,9 @@ impl ClassLoader {
         let data = self.read_class(name.clone());
         let class = self.define_class(class_loader_ref, data);
         link(&class);
-        info!("[Loaded {}", name);
+        if self.verbose_flag {
+            info!("[Loaded {}", name);
+        }
         class
     }
 

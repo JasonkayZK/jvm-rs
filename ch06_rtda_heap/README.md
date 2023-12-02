@@ -173,6 +173,8 @@ note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 MyObject:
 
 ```shell
+cargo run -- --cp ./resource --xjre $JAVA_HOME/jre jvmrust.ch06.MyObject
+
 [ INFO]: ch06_rtda_heap::cmd - classpath: /Users/zk/workspace/jvm-rs/ch06_rtda_heap/resource class: jvmrust.ch06.MyObject args: []
 [ INFO]: ch06_rtda_heap::rtda::heap::class_loader - [Loaded java/lang/Object
 [ INFO]: ch06_rtda_heap::rtda::heap::class_loader - [Loaded jvmrust/ch06/MyObject

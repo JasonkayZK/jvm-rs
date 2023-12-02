@@ -16,4 +16,10 @@ pub enum InstructionError {
 
     #[error("java.lang.IllegalAccessError")]
     IllegalAccessError,
+
+    #[error("java.lang.AbstractMethodError")]
+    AbstractMethodError,
+
+    #[error("java.lang.NoSuchMethodError")]
+    NoSuchMethodError,
 }

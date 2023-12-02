@@ -1,4 +1,6 @@
-use crate::rtda::object::Object;
-use std::ptr::NonNull;
+use std::cell::RefCell;
+use std::rc::Rc;
 
-pub type ObjectRef = Option<NonNull<Object>>;
+use crate::rtda::object::Object;
+
+pub type ObjectRef = Option<Rc<RefCell<Object>>>;

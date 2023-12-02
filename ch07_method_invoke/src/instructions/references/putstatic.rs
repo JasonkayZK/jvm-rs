@@ -1,7 +1,7 @@
 #![allow(non_camel_case_types)]
 
 use crate::instructions::base::bytecode_reader::BytecodeReader;
-use crate::instructions::base::Instruction;
+use crate::instructions::base::{init_class, Instruction};
 use crate::instructions::errors::InstructionError;
 use crate::rtda::frame::Frame;
 use crate::rtda::heap::field_ref::FieldRef;
@@ -31,7 +31,11 @@ impl Instruction for PUT_STATIC {
 
         let class = field.borrow().get_class().unwrap();
 
-        // TODO: init class
+        if !class.borrow().init_started() {
+            frame.revert_next_pc();
+            init_class(&frame.thread(), &class);
+            return;
+        }
 
         if !field.borrow().is_static() {
             panic!("{}", InstructionError::IncompatibleClassChangeError);

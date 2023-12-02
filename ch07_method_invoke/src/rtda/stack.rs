@@ -47,4 +47,8 @@ impl Stack {
         }
         self.frames[self.top - 1].clone().unwrap()
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.top == 0
+    }
 }

@@ -28,7 +28,7 @@ impl Entry for CompositeEntry {
                     return Ok(data);
                 }
                 Err(err) => {
-                    warn!("Warning: reading class err: {}", err);
+                    // warn!("Warning: reading class err: {}", err);
                 }
             }
         }

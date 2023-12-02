@@ -7,6 +7,7 @@ use crate::rtda::heap::access_flags::{
     ACC_STATIC, ACC_STRICT, ACC_SYNCHRONIZED, ACC_SYNTHETIC, ACC_VARARGS,
 };
 use crate::rtda::heap::class::Class;
+use crate::rtda::heap::method_descriptor::MethodDescriptorParser;
 use crate::types::{OptionRcRefCell, RcRefCell};
 
 #[derive(Default)]
@@ -19,6 +20,8 @@ pub struct Method {
     max_stack: u16,
     max_locals: u16,
     code: Vec<u8>,
+
+    arg_object_ref_count: u64,
 }
 
 impl Method {
@@ -33,25 +36,17 @@ impl Method {
         methods
     }
 
-    pub fn new(class: RcRefCell<Class>, cf_method: &MemberInfo) -> RcRefCell<Self> {
-        let (max_stack, max_locals, code) = match cf_method.code_attribute() {
-            Some(code_attr) => (
-                code_attr.max_stack(),
-                code_attr.max_locals(),
-                code_attr.code(),
-            ),
-            None => (0, 0, vec![]),
-        };
-
-        Rc::new(RefCell::new(Method {
-            access_flags: cf_method.access_flags(),
-            name: cf_method.name(),
-            descriptor: cf_method.descriptor(),
-            class: Some(class),
-            max_stack,
-            max_locals,
-            code,
-        }))
+    pub fn calc_arg_object_ref_count(&mut self) {
+        let parsed_descriptor = MethodDescriptorParser::parse(self.descriptor.clone());
+        for param_type in parsed_descriptor.parameter_types() {
+            self.arg_object_ref_count += 1;
+            if param_type == "J" || param_type == "D" {
+                self.arg_object_ref_count += 1;
+            }
+        }
+        if !self.is_static() {
+            self.arg_object_ref_count += 1; // `this` reference
+        }
     }
 
     pub fn is_public(&self) -> bool {
@@ -124,5 +119,51 @@ impl Method {
 
     pub fn code(&self) -> Vec<u8> {
         self.code.clone()
+    }
+
+    pub fn arg_object_ref_count(&self) -> u64 {
+        self.arg_object_ref_count
+    }
+
+    /// jvms 5.4.4
+    pub fn is_accessible_to(&self, class: &RcRefCell<Class>) -> bool {
+        if self.is_public() {
+            return true;
+        }
+        let c = self.class.as_ref().unwrap();
+        if self.is_protected() {
+            return class.eq(c)
+                || class.borrow().is_sub_class_of(c)
+                || c.borrow().get_package_name() == class.borrow().get_package_name();
+        }
+        if !self.is_private() {
+            return c.borrow().get_package_name() == class.borrow().get_package_name();
+        }
+        class.eq(c)
+    }
+
+    fn new(class: RcRefCell<Class>, cf_method: &MemberInfo) -> RcRefCell<Self> {
+        let (max_stack, max_locals, code) = match cf_method.code_attribute() {
+            Some(code_attr) => (
+                code_attr.max_stack(),
+                code_attr.max_locals(),
+                code_attr.code(),
+            ),
+            None => (0, 0, vec![]),
+        };
+
+        let mut method = Method {
+            access_flags: cf_method.access_flags(),
+            name: cf_method.name(),
+            descriptor: cf_method.descriptor(),
+            class: Some(class),
+            max_stack,
+            max_locals,
+            code,
+            arg_object_ref_count: 0,
+        };
+        method.calc_arg_object_ref_count();
+
+        Rc::new(RefCell::new(method))
     }
 }

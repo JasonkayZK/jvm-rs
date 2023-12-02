@@ -3,8 +3,8 @@ use std::result::Result;
 use crate::instructions::base::Instruction;
 use crate::instructions::constants::ldc::{LDC, LDC2_W, LDC_W};
 use crate::instructions::references::{
-    CHECK_CAST, GET_FIELD, GET_STATIC, INSTANCE_OF, INVOKE_SPECIAL, INVOKE_VIRTUAL, NEW, PUT_FIELD,
-    PUT_STATIC,
+    CHECK_CAST, GET_FIELD, GET_STATIC, INSTANCE_OF, INVOKE_INTERFACE, INVOKE_SPECIAL,
+    INVOKE_STATIC, INVOKE_VIRTUAL, NEW, PUT_FIELD, PUT_STATIC,
 };
 
 use super::comparisons::*;
@@ -227,36 +227,20 @@ pub fn new_instruction(opcode: u8) -> Result<Box<dyn Instruction>, String> {
         // },
         0xaa => Box::<TABLE_SWITCH>::default(),
         0xab => Box::<LOOKUP_SWITCH>::default(),
-        // 0xac => {
-        //     Box::new(IRETURN::default())
-        // },
-        // 0xad => {
-        //     Box::new(LRETURN::default())
-        // },
-        // 0xae => {
-        //     Box::new(FRETURN::default())
-        // },
-        // 0xaf => {
-        //     Box::new(DRETURN::default())
-        // },
-        // 0xb0 => {
-        //     Box::new(ARETURN::default())
-        // },
-        // 0xb1 => {
-        //     Box::new(_RETURN::default())
-        // },
+        0xac => Box::new(IRETURN),
+        0xad => Box::new(LRETURN),
+        0xae => Box::new(FRETURN),
+        0xaf => Box::new(DRETURN),
+        0xb0 => Box::new(ARETURN),
+        0xb1 => Box::new(RETURN),
         0xb2 => Box::<GET_STATIC>::default(),
         0xb3 => Box::<PUT_STATIC>::default(),
         0xb4 => Box::<GET_FIELD>::default(),
         0xb5 => Box::<PUT_FIELD>::default(),
         0xb6 => Box::<INVOKE_VIRTUAL>::default(),
         0xb7 => Box::<INVOKE_SPECIAL>::default(),
-        // 0xb8 => {
-        //     Box::new(INVOKE_STATIC::default())
-        // },
-        // 0xb9 => {
-        //     Box::new(INVOKE_INTERFACE::default())
-        // },
+        0xb8 => Box::<INVOKE_STATIC>::default(),
+        0xb9 => Box::<INVOKE_INTERFACE>::default(),
         // 0xba => {
         //     Box::new(INVOKE_DYNAMIC::default())
         // },

@@ -27,6 +27,8 @@ pub struct Class {
     instance_object_ref_count: u64,
     static_object_ref_count: u64,
     static_vars: OptionRcRefCell<HeapObjectRefs>,
+
+    init_started: bool,
 }
 
 impl Class {
@@ -45,6 +47,7 @@ impl Class {
             instance_object_ref_count: 0,
             static_object_ref_count: 0,
             static_vars: None,
+            init_started: false,
         };
         let rc_class = Rc::new(RefCell::new(class));
         rc_class.borrow_mut().constant_pool = Some(RuntimeConstantPool::new(
@@ -164,6 +167,10 @@ impl Class {
         self.get_static_method("main".into(), "([Ljava/lang/String;)V".into())
     }
 
+    pub fn get_clinit_method(&self) -> OptionRcRefCell<Method> {
+        self.get_static_method("<clinit>".into(), "()V".into())
+    }
+
     pub fn get_package_name(&self) -> String {
         match self.name.rfind('/') {
             Some(i) => self.name.as_str()[..i].into(),
@@ -250,6 +257,14 @@ impl Class {
             }
         }
         false
+    }
+
+    pub fn start_init(&mut self) {
+        self.init_started = true;
+    }
+
+    pub fn init_started(&self) -> bool {
+        self.init_started
     }
 }
 

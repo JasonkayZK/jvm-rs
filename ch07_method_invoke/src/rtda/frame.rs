@@ -59,4 +59,8 @@ impl Frame {
     pub fn method(&self) -> RcRefCell<Method> {
         self.method_ref.clone()
     }
+
+    pub fn revert_next_pc(&mut self) {
+        self.next_pc = self.thread().borrow().pc();
+    }
 }
