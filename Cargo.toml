@@ -18,6 +18,7 @@ members = [
     "ch05_instructions",
     "ch06_rtda_heap",
     "ch07_method_invoke",
+    "ch08_array_string",
 ]
 
 [workspace.dependencies]
