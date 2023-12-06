@@ -1,4 +1,5 @@
 use crate::rtda::errors::RuntimeDataAreaError;
+use crate::rtda::object::ObjectData;
 use crate::types::ObjectRef;
 
 #[derive(Clone)]
@@ -91,5 +92,15 @@ impl HeapObjectRefs {
             }
             HeapObjectRef::Ref(obj_ref) => obj_ref.clone(),
         }
+    }
+}
+
+impl ObjectData for HeapObjectRefs {
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
+        self
     }
 }

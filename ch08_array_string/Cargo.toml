@@ -10,3 +10,4 @@ clap = { workspace = true }
 thiserror = { workspace = true }
 zip = { version = "0.6", default-features = false, features = ["deflate"] }
 log = { version = "0.4" }
+once_cell = { version = "1.18" }

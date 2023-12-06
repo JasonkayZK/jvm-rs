@@ -3,8 +3,9 @@ use std::result::Result;
 use crate::instructions::base::Instruction;
 use crate::instructions::constants::ldc::{LDC, LDC2_W, LDC_W};
 use crate::instructions::references::{
-    CHECK_CAST, GET_FIELD, GET_STATIC, INSTANCE_OF, INVOKE_INTERFACE, INVOKE_SPECIAL,
-    INVOKE_STATIC, INVOKE_VIRTUAL, NEW, PUT_FIELD, PUT_STATIC,
+    ANEW_ARRAY, ARRAY_LENGTH, CHECK_CAST, GET_FIELD, GET_STATIC, INSTANCE_OF, INVOKE_INTERFACE,
+    INVOKE_SPECIAL, INVOKE_STATIC, INVOKE_VIRTUAL, MULTI_ANEW_ARRAY, NEW, NEW_ARRAY, PUT_FIELD,
+    PUT_STATIC,
 };
 
 use super::comparisons::*;
@@ -65,30 +66,14 @@ pub fn new_instruction(opcode: u8) -> Result<Box<dyn Instruction>, String> {
         0x2b => Box::<ALOAD_1>::default(),
         0x2c => Box::<ALOAD_2>::default(),
         0x2d => Box::<ALOAD_3>::default(),
-        // 0x2e => {
-        //     Box::new(IALOAD::default())
-        // },
-        // 0x2f => {
-        //     Box::new(LALOAD::default())
-        // },
-        // 0x30 => {
-        //     Box::new(FALOAD::default())
-        // },
-        // 0x31 => {
-        //     Box::new(DALOAD::default())
-        // },
-        // 0x32 => {
-        //     Box::new(AALOAD::default())
-        // },
-        // 0x33 => {
-        //     Box::new(BALOAD::default())
-        // },
-        // 0x34 => {
-        //     Box::new(CALOAD::default())
-        // },
-        // 0x35 => {
-        //     Box::new(SALOAD::default())
-        // },
+        0x2e => Box::new(IALOAD),
+        0x2f => Box::new(LALOAD),
+        0x30 => Box::new(FALOAD),
+        0x31 => Box::new(DALOAD),
+        0x32 => Box::new(AALOAD),
+        0x33 => Box::new(BALOAD),
+        0x34 => Box::new(CALOAD),
+        0x35 => Box::new(SALOAD),
         0x36 => Box::<ISTORE>::default(),
         0x37 => Box::<LSTORE>::default(),
         0x38 => Box::<FSTORE>::default(),
@@ -114,30 +99,14 @@ pub fn new_instruction(opcode: u8) -> Result<Box<dyn Instruction>, String> {
         0x4c => Box::<ASTORE_1>::default(),
         0x4d => Box::<ASTORE_2>::default(),
         0x4e => Box::<ASTORE_3>::default(),
-        // 0x4f => {
-        //     Box::new(IASTORE::default())
-        // },
-        // 0x50 => {
-        //     Box::new(LASTORE::default())
-        // },
-        // 0x51 => {
-        //     Box::new(FASTORE::default())
-        // },
-        // 0x52 => {
-        //     Box::new(DASTORE::default())
-        // },
-        // 0x53 => {
-        //     Box::new(AASTORE::default())
-        // },
-        // 0x54 => {
-        //     Box::new(BASTORE::default())
-        // },
-        // 0x55 => {
-        //     Box::new(CASTORE::default())
-        // },
-        // 0x56 => {
-        //     Box::new(SASTORE::default())
-        // },
+        0x4f => Box::new(IASTORE),
+        0x50 => Box::new(LASTORE),
+        0x51 => Box::new(FASTORE),
+        0x52 => Box::new(DASTORE),
+        0x53 => Box::new(AASTORE),
+        0x54 => Box::new(BASTORE),
+        0x55 => Box::new(CASTORE),
+        0x56 => Box::new(SASTORE),
         0x57 => Box::<POP>::default(),
         0x58 => Box::<POP2>::default(),
         0x59 => Box::<DUP>::default(),
@@ -245,15 +214,9 @@ pub fn new_instruction(opcode: u8) -> Result<Box<dyn Instruction>, String> {
         //     Box::new(INVOKE_DYNAMIC::default())
         // },
         0xbb => Box::<NEW>::default(),
-        // 0xbc => {
-        //     Box::new(NEW_ARRAY::default())
-        // },
-        // 0xbd => {
-        //     Box::new(ANEW_ARRAY::default())
-        // },
-        // 0xbe => {
-        //     Box::new(ARRAYLENG::default())
-        // },
+        0xbc => Box::<NEW_ARRAY>::default(),
+        0xbd => Box::<ANEW_ARRAY>::default(),
+        0xbe => Box::new(ARRAY_LENGTH),
         // 0xbf => {
         //     Box::new(ATHROW::default())
         // },
@@ -266,9 +229,7 @@ pub fn new_instruction(opcode: u8) -> Result<Box<dyn Instruction>, String> {
         //     Box::new(MONITOREXIT::default())
         // },
         0xc4 => Box::<WIDE>::default(),
-        // 0xc5 => {
-        //     Box::new(MULTI_ANEW_ARRAY::default())
-        // },
+        0xc5 => Box::<MULTI_ANEW_ARRAY>::default(),
         0xc6 => Box::<IFNULL>::default(),
         0xc7 => Box::<IFNONNULL>::default(),
         0xc8 => Box::<GOTO_W>::default(),

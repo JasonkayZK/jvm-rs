@@ -6,6 +6,7 @@ use crate::instructions::errors::InstructionError;
 use crate::rtda::frame::Frame;
 use crate::rtda::heap::method_lookup::lookup_method_in_class;
 use crate::rtda::heap::method_ref::MethodRef;
+use crate::rtda::heap::string_pool;
 use crate::rtda::operand_stack::OperandStack;
 
 /// Invoke instance method; dispatch based on class
@@ -110,6 +111,10 @@ fn println(stack: &mut OperandStack, descriptor: String) {
         println!("{}", stack.pop_long());
     } else if descriptor == "(D)V" {
         println!("{}", stack.pop_double());
+    } else if descriptor == "(Ljava/lang/String;)V" {
+        let j_str = stack.pop_ref();
+        let r_str = string_pool::rust_string(j_str.as_ref().unwrap());
+        println!("{}", r_str);
     } else {
         panic!("println: {}", descriptor);
     }

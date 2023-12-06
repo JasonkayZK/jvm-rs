@@ -22,4 +22,10 @@ pub enum InstructionError {
 
     #[error("java.lang.NoSuchMethodError")]
     NoSuchMethodError,
+
+    #[error("java.lang.NegativeArraySizeException: {0:?}")]
+    NegativeArraySizeException(i32),
+
+    #[error("java.lang.ArrayIndexOutOfBoundsException: length: {0:?}, index: {1:?}")]
+    ArrayIndexOutOfBoundsException(usize, i32),
 }

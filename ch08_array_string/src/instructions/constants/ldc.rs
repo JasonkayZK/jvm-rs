@@ -7,6 +7,7 @@ use crate::classfile::constant_pool::consts;
 use crate::instructions::base::bytecode_reader::BytecodeReader;
 use crate::instructions::base::Instruction;
 use crate::rtda::frame::Frame;
+use crate::rtda::heap::string_pool::StringPool;
 
 /// Push item from run-time constant pool
 #[derive(Default, Debug)]
@@ -110,6 +111,20 @@ fn _ldc(frame: &mut Frame, index: u64) {
                 .downcast_ref::<f32>()
                 .unwrap();
             stack.push_float(val);
+        }
+        consts::CONSTANT_STRING => {
+            let val = &*r_cp
+                .borrow_mut()
+                .get_constant(index as usize)
+                .as_any()
+                .downcast_ref::<String>()
+                .unwrap()
+                .clone();
+            let interned_str = StringPool::global()
+                .lock()
+                .unwrap()
+                .jstring(current_class.borrow().loader().unwrap(), val.into());
+            stack.push_ref(Some(interned_str));
         }
         _ => {
             panic!("TODO: ldc!");

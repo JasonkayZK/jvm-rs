@@ -4,6 +4,10 @@
 
 A JVM implemented in rust.
 
+Book:
+
+- [《自己动手写Java虚拟机》](https://book.douban.com/subject/26802084/)
+
 Reference:
 
 - https://github.com/zxh0/jvmgo-book/

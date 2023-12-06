@@ -7,16 +7,47 @@ use crate::instructions::base::bytecode_reader::BytecodeReader;
 use crate::instructions::base::Instruction;
 use crate::instructions::factory::new_instruction;
 use crate::rtda::frame::Frame;
+use crate::rtda::heap::consts::STRING_CLASS;
 use crate::rtda::heap::method::Method;
+use crate::rtda::heap::string_pool::StringPool;
+use crate::rtda::object::Object;
 use crate::rtda::thread::Thread;
 use crate::types::RcRefCell;
 
-pub fn interpret(method_ref: RcRefCell<Method>, enable_log: bool) {
+pub fn interpret(method_ref: RcRefCell<Method>, enable_log: bool, args: Vec<String>) {
     let thread_ref = Thread::new_ref();
-    let frame = Thread::new_frame(thread_ref.clone(), method_ref);
+    let mut frame = Thread::new_frame(thread_ref.clone(), method_ref.clone());
+
+    let j_args = create_args_array(method_ref, args);
+    frame.local_vars_mut().set_ref(0, Some(j_args));
+
     thread_ref.borrow_mut().push_frame(frame);
 
     interpret_loop(thread_ref, enable_log);
+}
+
+fn create_args_array(method: RcRefCell<Method>, args: Vec<String>) -> RcRefCell<Object> {
+    let class = method.borrow().get_class();
+    let loader = class.borrow_mut().loader().unwrap();
+
+    let string_class = loader
+        .borrow_mut()
+        .load_class(loader.clone(), STRING_CLASS.to_string());
+    let array_class = string_class.borrow_mut().array_class();
+    let mut args_arr = array_class
+        .borrow_mut()
+        .new_array(array_class.clone(), args.len());
+
+    let j_args = args_arr.refs_mut();
+    for i in 0..args.len() {
+        let j_str = StringPool::global()
+            .lock()
+            .unwrap()
+            .jstring(loader.clone(), args[i].clone());
+        j_args[i] = Some(j_str);
+    }
+
+    Rc::new(RefCell::new(args_arr))
 }
 
 /// Interpret the instruction

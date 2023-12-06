@@ -74,7 +74,7 @@ pub fn start_jvm(cmd: Cmd) {
     let main_method = main_class.borrow_mut().get_main_method();
     match main_method {
         Some(member) => {
-            interpret(member, cmd.verbose_inst_flag);
+            interpret(member, cmd.verbose_inst_flag, cp_args.args);
         }
         None => {
             error!("Main method not found in class {}", &cp_args.class);

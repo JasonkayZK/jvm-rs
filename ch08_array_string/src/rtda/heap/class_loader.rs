@@ -8,9 +8,11 @@ use crate::classfile::class_file::ClassFile;
 use crate::classpath::classpath_impl::ClasspathImpl;
 use crate::classpath::entry::Entry;
 use crate::rtda::heap::class::Class;
+use crate::rtda::heap::consts::OBJECT_CLASS;
 use crate::rtda::heap::errors::RuntimeHeapError;
 use crate::rtda::heap::field::Field;
 use crate::rtda::heap::object_ref::HeapObjectRefs;
+use crate::rtda::heap::string_pool::StringPool;
 use crate::types::RcRefCell;
 
 /// class names:
@@ -50,8 +52,34 @@ impl ClassLoader {
                 // Already loaded
                 class.clone()
             }
-            None => self.load_non_array_class(&class_loader_ref, name),
+            None => {
+                // Array class
+                if name.as_bytes()[0] == b'[' {
+                    return self.load_array_class(&class_loader_ref, name);
+                }
+                // Non-array class
+                self.load_non_array_class(&class_loader_ref, name)
+            }
         }
+    }
+
+    fn load_array_class(
+        &mut self,
+        class_loader_ref: &RcRefCell<Self>,
+        name: String,
+    ) -> RcRefCell<Class> {
+        let array_class = Class::new_array_class(name);
+
+        array_class
+            .borrow_mut()
+            .set_loader(Some(class_loader_ref.clone()));
+
+        self.resolve_super_class(class_loader_ref, &array_class);
+        self.resolve_interfaces(class_loader_ref, &array_class);
+
+        self.class_map
+            .insert(array_class.borrow().name().to_string(), array_class.clone());
+        array_class
     }
 
     /// Load a class that is not a array
@@ -117,7 +145,7 @@ impl ClassLoader {
         class: &RcRefCell<Class>,
     ) {
         // java/lang/Object has no super class!
-        if class.borrow_mut().name() != "java/lang/Object" {
+        if class.borrow_mut().name() != OBJECT_CLASS {
             let super_class = Some(self.load_class(
                 class_loader_ref.clone(),
                 class.borrow_mut().super_classname().to_string(),
@@ -256,7 +284,19 @@ fn init_static_final_var(
                 .unwrap();
             vars.borrow_mut().set_double(object_ref_id as usize, val);
         } else if descriptor == "Ljava/lang/String;" {
-            panic!("Todo");
+            let val = &*cp
+                .borrow()
+                .get_constant(cp_index as usize)
+                .as_any()
+                .downcast_ref::<String>()
+                .unwrap()
+                .clone();
+            let interned_str = StringPool::global()
+                .lock()
+                .unwrap()
+                .jstring(class.borrow().loader().unwrap(), val.into());
+            vars.borrow_mut()
+                .set_ref(object_ref_id as usize, Some(interned_str));
         }
     }
 }

@@ -16,4 +16,10 @@ pub enum RuntimeHeapError {
 
     #[error("Parse classfile err: {0:?}")]
     ParseClassFailed(String),
+
+    #[error("Unknown Array type: {0:?}")]
+    UnknownArrayType(u8),
+
+    #[error("Not array class")]
+    NotArrayClass(String),
 }
