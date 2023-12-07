@@ -6,6 +6,7 @@ use log::error;
 
 use crate::classpath::classpath_impl::ClasspathImpl;
 use crate::instructions::interpret::interpret;
+use crate::native::registry::NativeRegistry;
 use crate::rtda::heap::class_loader::ClassLoader;
 
 #[derive(Debug, Parser)]
@@ -66,7 +67,7 @@ pub fn start_jvm(cmd: Cmd) {
         &cp_args.classpath,
     );
 
-    let class_loader = Rc::new(RefCell::new(ClassLoader::new(cp, cmd.verbose_class_flag)));
+    let class_loader = ClassLoader::new(cp, cmd.verbose_class_flag);
     let class_name = cp_args.class.replace('.', "/");
     let main_class = class_loader
         .borrow_mut()

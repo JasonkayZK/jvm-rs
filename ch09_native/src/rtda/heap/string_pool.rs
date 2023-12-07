@@ -25,7 +25,6 @@ pub struct StringPool {
 impl StringPool {
     pub fn global() -> &'static ArcMutex<StringPool> {
         static STRING_POOL: OnceLock<ArcMutex<StringPool>> = OnceLock::new();
-        // 获取或初始化 Logger
         STRING_POOL.get_or_init(|| {
             Arc::new(Mutex::new(StringPool {
                 pool: HashMap::new(),
@@ -64,6 +63,18 @@ impl StringPool {
 
         j_str
     }
+
+    pub fn is_exist(&self, rstr: String) -> bool {
+        let interned_str = self.pool.get(rstr.as_str());
+        if interned_str.is_some() {
+            return true;
+        }
+        false
+    }
+
+    pub fn add(&mut self, rstr: String, jstring: RcRefCell<Object>) {
+        self.pool.insert(rstr, JStringObjectPtr { data: jstring });
+    }
 }
 
 /// java.lang.String -> rust String
@@ -81,4 +92,18 @@ pub fn string_to_utf16(s: String) -> Vec<u16> {
 /// utf16 -> utf-8
 pub fn utf16_to_string(s: Vec<u16>) -> String {
     String::from_utf16(&s).unwrap()
+}
+
+/// java.lang.String -> rust String
+pub fn intern_string(obj: &RcRefCell<Object>) -> RcRefCell<Object> {
+    let rust_string = rust_string(obj);
+    let class = obj.borrow().class().clone();
+    let loader = class.borrow().loader().unwrap();
+    let mut string_pool = StringPool::global().lock().unwrap();
+    if string_pool.is_exist(rust_string.clone()) {
+        return string_pool.jstring(loader, rust_string);
+    }
+    string_pool.add(rust_string, obj.clone());
+
+    obj.clone()
 }

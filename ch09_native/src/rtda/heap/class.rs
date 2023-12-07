@@ -7,14 +7,14 @@ use crate::rtda::heap::access_flags::{
     ACC_SYNTHETIC,
 };
 use crate::rtda::heap::class_loader::ClassLoader;
-use crate::rtda::heap::class_name_helper::get_array_class_name;
+use crate::rtda::heap::class_name_helper::{get_array_class_name, PRIMITIVE_TYPES};
 use crate::rtda::heap::consts::{CLONEABLE_CLASS, OBJECT_CLASS, SERIALIZABLE_CLASS};
 use crate::rtda::heap::field::Field;
 use crate::rtda::heap::method::Method;
 use crate::rtda::heap::object_ref::HeapObjectRefs;
 use crate::rtda::heap::runtime_constant_pool::RuntimeConstantPool;
 use crate::rtda::object::Object;
-use crate::types::{OptionRcRefCell, OptionVecRcRefCell, RcRefCell, VecRcRefCell};
+use crate::types::{ObjectRef, OptionRcRefCell, OptionVecRcRefCell, RcRefCell, VecRcRefCell};
 
 pub struct Class {
     access_flags: u16,
@@ -32,6 +32,9 @@ pub struct Class {
     static_vars: OptionRcRefCell<HeapObjectRefs>,
 
     init_started: bool,
+
+    /// Reflection implementation points to the Class object
+    j_class: OptionRcRefCell<Object>,
 }
 
 impl Class {
@@ -51,6 +54,7 @@ impl Class {
             static_object_ref_count: 0,
             static_vars: None,
             init_started: false,
+            j_class: None,
         };
         let rc_class = Rc::new(RefCell::new(class));
         rc_class.borrow_mut().constant_pool = Some(RuntimeConstantPool::new(
@@ -78,6 +82,28 @@ impl Class {
             static_object_ref_count: 0,
             static_vars: None,
             init_started: true,
+            j_class: None,
+        };
+        Rc::new(RefCell::new(class))
+    }
+
+    pub fn new_primitive_class(name: String) -> RcRefCell<Self> {
+        let class = Class {
+            access_flags: ACC_PUBLIC,
+            name,
+            super_classname: "".into(),
+            interface_names: vec![],
+            constant_pool: None,
+            fields: Some(vec![]),
+            methods: Some(vec![]),
+            loader: None,
+            super_class: None,
+            interfaces: Some(vec![]),
+            instance_object_ref_count: 0,
+            static_object_ref_count: 0,
+            static_vars: None,
+            init_started: true,
+            j_class: None,
         };
         Rc::new(RefCell::new(class))
     }
@@ -187,11 +213,46 @@ impl Class {
     }
 
     pub fn get_main_method(&self) -> OptionRcRefCell<Method> {
-        self.get_static_method("main".into(), "([Ljava/lang/String;)V".into())
+        self.get_method("main", "([Ljava/lang/String;)V", true)
     }
 
     pub fn get_clinit_method(&self) -> OptionRcRefCell<Method> {
-        self.get_static_method("<clinit>".into(), "()V".into())
+        self.get_method("<clinit>", "()V", true)
+    }
+
+    pub fn get_instance_method(&self, name: &str, descriptor: &str) -> OptionRcRefCell<Method> {
+        self.get_method(name, descriptor, false)
+    }
+
+    fn get_method(&self, name: &str, descriptor: &str, is_static: bool) -> OptionRcRefCell<Method> {
+        if let Some(method) = self._get_method(&self.methods, name, descriptor, is_static) {
+            Some(method)
+        } else if let Some(super_class) = &self.super_class {
+            super_class.borrow().get_method(name, descriptor, is_static)
+        } else {
+            None
+        }
+    }
+
+    fn _get_method(
+        &self,
+        methods: &OptionVecRcRefCell<Method>,
+        name: &str,
+        descriptor: &str,
+        is_static: bool,
+    ) -> OptionRcRefCell<Method> {
+        if let Some(methods) = methods {
+            for method in methods {
+                let b_method = method.borrow();
+                if b_method.is_static().eq(&is_static)
+                    && b_method.name() == name
+                    && b_method.descriptor() == descriptor
+                {
+                    return Some(method.clone());
+                }
+            }
+        }
+        None
     }
 
     pub fn get_package_name(&self) -> String {
@@ -199,19 +260,6 @@ impl Class {
             Some(i) => self.name.as_str()[..i].into(),
             None => "".into(),
         }
-    }
-
-    fn get_static_method(&self, name: String, descriptor: String) -> OptionRcRefCell<Method> {
-        for method in self.methods.as_ref().unwrap() {
-            let b_method = method.borrow();
-            if b_method.is_static()
-                && b_method.name() == name
-                && b_method.descriptor() == descriptor
-            {
-                return Some(method.clone());
-            }
-        }
-        None
     }
 
     /// jvms 5.4.4
@@ -363,6 +411,39 @@ impl Class {
             c = class.borrow().super_class();
         }
         None
+    }
+
+    pub fn get_ref_var(&self, name: String, descriptor: String) -> ObjectRef {
+        let field = self.get_field(name, descriptor, true).unwrap();
+        let obj_ref = self
+            .static_vars
+            .as_ref()
+            .unwrap()
+            .borrow()
+            .get_ref(field.borrow().object_ref_id() as usize);
+        obj_ref
+    }
+
+    pub fn set_ref_var(&mut self, name: String, descriptor: String, obj_ref: ObjectRef) {
+        let field = self.get_field(name, descriptor, true).unwrap();
+        self.static_vars
+            .as_mut()
+            .unwrap()
+            .borrow_mut()
+            .set_ref(field.borrow().object_ref_id() as usize, obj_ref);
+    }
+
+    pub fn j_class(&self) -> OptionRcRefCell<Object> {
+        self.j_class.clone()
+    }
+
+    pub fn set_j_class(&mut self, j_class: OptionRcRefCell<Object>) {
+        self.j_class = j_class;
+    }
+
+    pub fn is_primitive(&self) -> bool {
+        let r = PRIMITIVE_TYPES.get(self.name.as_str());
+        r.is_some()
     }
 
     fn is_jl_object(&self) -> bool {

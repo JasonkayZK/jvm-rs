@@ -39,21 +39,6 @@ pub fn invoke_method(frame: &mut Frame, method: &RcRefCell<Method>) {
     }
 
     thread.borrow_mut().push_frame(new_frame);
-
-    // todo
-    // Hack!
-    if method.borrow().is_native() {
-        if method.borrow().name() == "registerNatives" {
-            thread.borrow_mut().pop_frame();
-        } else {
-            panic!(
-                "native method: {}.{}{}",
-                method.borrow().get_class().borrow().name(),
-                method.borrow().name(),
-                method.borrow().descriptor()
-            );
-        }
-    }
 }
 
 pub fn init_class(thread: &RcRefCell<Thread>, class: &RcRefCell<Class>) {

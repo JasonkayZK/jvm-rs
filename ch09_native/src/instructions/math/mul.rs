@@ -40,7 +40,7 @@ impl Instruction for IMUL {
         let stack = frame.operand_stack_mut();
         let v2 = stack.pop_int();
         let v1 = stack.pop_int();
-        let result = v1 * v2;
+        let result = v1.wrapping_mul(v2);
         stack.push_int(result);
     }
 }
@@ -54,7 +54,7 @@ impl Instruction for LMUL {
         let stack = frame.operand_stack_mut();
         let v2 = stack.pop_long();
         let v1 = stack.pop_long();
-        let result = v1 * v2;
+        let result = v1.wrapping_mul(v2);
         stack.push_long(result);
     }
 }

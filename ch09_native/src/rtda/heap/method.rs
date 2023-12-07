@@ -36,9 +36,8 @@ impl Method {
         methods
     }
 
-    pub fn calc_arg_object_ref_count(&mut self) {
-        let parsed_descriptor = MethodDescriptorParser::parse(self.descriptor.clone());
-        for param_type in parsed_descriptor.parameter_types() {
+    pub fn calc_arg_object_ref_count(&mut self, parsed_descriptor: &Vec<String>) {
+        for param_type in parsed_descriptor {
             self.arg_object_ref_count += 1;
             if param_type == "J" || param_type == "D" {
                 self.arg_object_ref_count += 1;
@@ -162,8 +161,43 @@ impl Method {
             code,
             arg_object_ref_count: 0,
         };
-        method.calc_arg_object_ref_count();
+        let parsed_descriptor = MethodDescriptorParser::parse(method.descriptor.clone());
+        method.calc_arg_object_ref_count(&parsed_descriptor.parameter_types());
+        if method.is_native() {
+            method.inject_code_attribute(parsed_descriptor.return_type());
+        }
 
         Rc::new(RefCell::new(method))
+    }
+
+    /// Inject bytecode and stack info for native method
+    ///
+    /// We use `0xfe` to execute native method
+    ///
+    /// Note that: `0xfe` is a reserved instruction for customize usage
+    fn inject_code_attribute(&mut self, return_type: String) {
+        // Todo: currently we set the stack to 4
+        self.max_stack = 4;
+        self.max_locals = self.arg_object_ref_count as u16;
+        match return_type.as_bytes()[0] {
+            b'L' | b'[' => {
+                self.code = vec![0xfe, 0xb0]; // areturn
+            }
+            b'V' => {
+                self.code = vec![0xfe, 0xb1]; // return
+            }
+            b'D' => {
+                self.code = vec![0xfe, 0xaf]; // dreturn
+            }
+            b'F' => {
+                self.code = vec![0xfe, 0xae]; // freturn
+            }
+            b'J' => {
+                self.code = vec![0xfe, 0xad]; // lreturn
+            }
+            _ => {
+                self.code = vec![0xfe, 0xac]; // ireturn
+            }
+        }
     }
 }

@@ -93,6 +93,10 @@ impl HeapObjectRefs {
             HeapObjectRef::Ref(obj_ref) => obj_ref.clone(),
         }
     }
+
+    pub fn get_refs_len(&self) -> usize {
+        self.refs.len()
+    }
 }
 
 impl ObjectData for HeapObjectRefs {

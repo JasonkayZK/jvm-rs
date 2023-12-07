@@ -28,4 +28,7 @@ pub enum InstructionError {
 
     #[error("java.lang.ArrayIndexOutOfBoundsException: length: {0:?}, index: {1:?}")]
     ArrayIndexOutOfBoundsException(usize, i32),
+
+    #[error("java.lang.UnsatisfiedLinkError: {0:?}")]
+    UnsatisfiedLinkError(String),
 }

@@ -3,7 +3,7 @@ use crate::rtda::heap::consts::ArrayTypeEnum::{
 };
 use crate::rtda::heap::errors::RuntimeHeapError;
 use crate::rtda::object::{Object, ObjectData};
-use crate::types::OptionRcRefCell;
+use crate::types::{OptionRcRefCell, RcRefCell};
 
 /// Byte array
 impl ObjectData for Vec<i8> {
@@ -183,7 +183,7 @@ impl Object {
     }
 
     pub fn array_length(&self) -> usize {
-        match self.data().tag().into() {
+        match self.data().tag().try_into().unwrap() {
             Bytes => self
                 .data()
                 .as_any()
@@ -233,6 +233,147 @@ impl Object {
                 .unwrap()
                 .len(),
             _ => panic!("{}", RuntimeHeapError::UnknownArrayType(self.data().tag())),
+        }
+    }
+
+    pub fn array_copy(
+        src: RcRefCell<Object>,
+        dest: RcRefCell<Object>,
+        src_pos: usize,
+        dest_pos: usize,
+        length: usize,
+    ) {
+        let mut src = src.borrow_mut();
+        let mut dest = dest.borrow_mut();
+        match src.data().tag().try_into().unwrap() {
+            Bytes => {
+                let _src = src
+                    .data_mut()
+                    .as_any_mut()
+                    .downcast_mut::<Vec<i8>>()
+                    .unwrap();
+                let _dest = dest
+                    .data_mut()
+                    .as_any_mut()
+                    .downcast_mut::<Vec<i8>>()
+                    .unwrap();
+                let _src = &_src[src_pos..src_pos + length];
+                let _dest = &mut _dest[dest_pos..dest_pos + length];
+                _dest.copy_from_slice(_src);
+            }
+            Shorts => {
+                let _src = src
+                    .data_mut()
+                    .as_any_mut()
+                    .downcast_mut::<Vec<i16>>()
+                    .unwrap();
+                let _dest = dest
+                    .data_mut()
+                    .as_any_mut()
+                    .downcast_mut::<Vec<i16>>()
+                    .unwrap();
+                let _src = &_src[src_pos..src_pos + length];
+                let _dest = &mut _dest[dest_pos..dest_pos + length];
+                _dest.copy_from_slice(_src);
+            }
+            Ints => {
+                let _src = src
+                    .data_mut()
+                    .as_any_mut()
+                    .downcast_mut::<Vec<i32>>()
+                    .unwrap();
+                let _dest = dest
+                    .data_mut()
+                    .as_any_mut()
+                    .downcast_mut::<Vec<i32>>()
+                    .unwrap();
+                let _src = &_src[src_pos..src_pos + length];
+                let _dest = &mut _dest[dest_pos..dest_pos + length];
+                _dest.copy_from_slice(_src);
+            }
+            Longs => {
+                let _src = src
+                    .data_mut()
+                    .as_any_mut()
+                    .downcast_mut::<Vec<i64>>()
+                    .unwrap();
+                let _dest = dest
+                    .data_mut()
+                    .as_any_mut()
+                    .downcast_mut::<Vec<i64>>()
+                    .unwrap();
+                let _src = &_src[src_pos..src_pos + length];
+                let _dest = &mut _dest[dest_pos..dest_pos + length];
+                _dest.copy_from_slice(_src);
+            }
+            Chars => {
+                let _src = src
+                    .data_mut()
+                    .as_any_mut()
+                    .downcast_mut::<Vec<u16>>()
+                    .unwrap();
+                let _dest = dest
+                    .data_mut()
+                    .as_any_mut()
+                    .downcast_mut::<Vec<u16>>()
+                    .unwrap();
+                let _src = &_src[src_pos..src_pos + length];
+                let _dest = &mut _dest[dest_pos..dest_pos + length];
+                _dest.copy_from_slice(_src);
+            }
+            Floats => {
+                let _src = src
+                    .data_mut()
+                    .as_any_mut()
+                    .downcast_mut::<Vec<f32>>()
+                    .unwrap();
+                let _dest = dest
+                    .data_mut()
+                    .as_any_mut()
+                    .downcast_mut::<Vec<f32>>()
+                    .unwrap();
+                let _src = &_src[src_pos..src_pos + length];
+                let _dest = &mut _dest[dest_pos..dest_pos + length];
+                _dest.copy_from_slice(_src);
+            }
+            Doubles => {
+                let _src = src
+                    .data_mut()
+                    .as_any_mut()
+                    .downcast_mut::<Vec<f64>>()
+                    .unwrap();
+                let _dest = dest
+                    .data_mut()
+                    .as_any_mut()
+                    .downcast_mut::<Vec<f64>>()
+                    .unwrap();
+                let _src = &_src[src_pos..src_pos + length];
+                let _dest = &mut _dest[dest_pos..dest_pos + length];
+                _dest.copy_from_slice(_src);
+            }
+            Refs => {
+                let _src = src
+                    .data_mut()
+                    .as_any_mut()
+                    .downcast_mut::<Vec<OptionRcRefCell<Object>>>()
+                    .unwrap();
+                let _dest = dest
+                    .data_mut()
+                    .as_any_mut()
+                    .downcast_mut::<Vec<OptionRcRefCell<Object>>>()
+                    .unwrap();
+                let _src = &_src[src_pos..src_pos + length];
+                let _dest = &mut _dest[dest_pos..dest_pos + length];
+
+                // 引用复制
+                for i in 0.._dest.len() {
+                    if i >= _src.len() {
+                        break;
+                    }
+                    _dest[i] = _src[i].clone();
+                }
+            }
+            _ => panic!("{}", RuntimeHeapError::UnknownArrayType(src.data().tag())),
         }
     }
 }

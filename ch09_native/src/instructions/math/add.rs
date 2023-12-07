@@ -40,7 +40,7 @@ impl Instruction for IADD {
         let stack = frame.operand_stack_mut();
         let v2 = stack.pop_int();
         let v1 = stack.pop_int();
-        let result = v1 + v2;
+        let result = v1.wrapping_add(v2);
         stack.push_int(result);
     }
 }
@@ -54,7 +54,7 @@ impl Instruction for LADD {
         let stack = frame.operand_stack_mut();
         let v2 = stack.pop_long();
         let v1 = stack.pop_long();
-        let result = v1 + v2;
+        let result = v1.wrapping_add(v2);
         stack.push_long(result);
     }
 }

@@ -10,6 +10,7 @@ pub mod classpath;
 pub mod cmd;
 pub mod instructions;
 pub mod logger;
+pub mod native;
 pub mod rtda;
 pub mod types;
 

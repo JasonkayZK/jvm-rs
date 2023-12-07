@@ -10,5 +10,6 @@ pub mod interpret;
 pub mod loads;
 pub mod math;
 pub mod references;
+pub mod reserved;
 pub mod stack;
 pub mod stores;

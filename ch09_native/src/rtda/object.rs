@@ -3,9 +3,12 @@ use crate::types::RcRefCell;
 
 use super::heap::class::Class;
 
+pub static OBJECT_TAG: u8 = 10;
+
 pub trait ObjectData {
     fn tag(&self) -> u8 {
-        10
+        /// Default tag value for Object
+        OBJECT_TAG
     }
 
     fn as_any(&self) -> &dyn std::any::Any;
@@ -13,9 +16,20 @@ pub trait ObjectData {
     fn as_any_mut(&mut self) -> &mut dyn std::any::Any;
 }
 
+/// ObjectExtra stores extra information about an object
+///
+/// Currently we use it to store the corresponding class object for this object
+pub trait ObjectExtra {
+    fn as_any(&self) -> &dyn std::any::Any;
+
+    fn as_any_mut(&mut self) -> &mut dyn std::any::Any;
+}
+
 pub struct Object {
     class: RcRefCell<Class>,
-    data: Box<dyn ObjectData>, // Ref for Object, []int32 for int[] ...
+    data: Box<dyn ObjectData>,
+    // Ref for Object, []int32 for int[] ...
+    extra: Option<Box<dyn ObjectExtra>>,
 }
 
 impl PartialEq for Object {
@@ -38,7 +52,11 @@ impl Object {
     }
 
     pub fn new_data(class: RcRefCell<Class>, data: Box<dyn ObjectData>) -> Self {
-        Object { class, data }
+        Object {
+            class,
+            data,
+            extra: None,
+        }
     }
 
     pub fn class(&self) -> &RcRefCell<Class> {
@@ -72,6 +90,14 @@ impl Object {
         self.data.as_mut()
     }
 
+    pub fn extra(&self) -> Option<&dyn ObjectExtra> {
+        self.extra.as_deref()
+    }
+
+    pub fn set_extra(&mut self, extra: Option<Box<dyn ObjectExtra>>) {
+        self.extra = extra;
+    }
+
     /// Reflection
     pub fn get_ref_var(&mut self, name: String, descriptor: String) -> RcRefCell<Object> {
         let field = self.class.borrow().get_field(name, descriptor, false);
@@ -94,5 +120,30 @@ impl Object {
             .downcast_mut::<HeapObjectRefs>()
             .unwrap();
         slots.set_ref(field.unwrap().borrow().object_ref_id() as usize, Some(_ref));
+    }
+}
+
+/// ClassData stores the corresponding class object for this object
+pub struct ClassData {
+    class: RcRefCell<Class>,
+}
+
+impl ClassData {
+    pub fn new(class: RcRefCell<Class>) -> Self {
+        ClassData { class }
+    }
+
+    pub fn java_name(&self) -> String {
+        self.class.borrow().name().replace('/', ".")
+    }
+}
+
+impl ObjectExtra for ClassData {
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
+        self
     }
 }

@@ -8,11 +8,13 @@ use crate::classfile::class_file::ClassFile;
 use crate::classpath::classpath_impl::ClasspathImpl;
 use crate::classpath::entry::Entry;
 use crate::rtda::heap::class::Class;
-use crate::rtda::heap::consts::OBJECT_CLASS;
+use crate::rtda::heap::class_name_helper::PRIMITIVE_TYPES;
+use crate::rtda::heap::consts::{CLASS_CLASS, OBJECT_CLASS};
 use crate::rtda::heap::errors::RuntimeHeapError;
 use crate::rtda::heap::field::Field;
 use crate::rtda::heap::object_ref::HeapObjectRefs;
 use crate::rtda::heap::string_pool::StringPool;
+use crate::rtda::object::ClassData;
 use crate::types::RcRefCell;
 
 /// class names:
@@ -29,12 +31,18 @@ pub struct ClassLoader {
 }
 
 impl ClassLoader {
-    pub fn new(classpath: ClasspathImpl, verbose_flag: bool) -> Self {
-        ClassLoader {
+    pub fn new(classpath: ClasspathImpl, verbose_flag: bool) -> RcRefCell<Self> {
+        let class_loader = ClassLoader {
             classpath,
             class_map: HashMap::new(),
             verbose_flag,
-        }
+        };
+        let class_loader = Rc::new(RefCell::new(class_loader));
+        class_loader.borrow_mut().load_basic_class(&class_loader);
+        class_loader
+            .borrow_mut()
+            .load_primitive_classes(&class_loader);
+        class_loader
     }
 
     /// Load all type of classes:
@@ -53,14 +61,69 @@ impl ClassLoader {
                 class.clone()
             }
             None => {
-                // Array class
+                let mut class;
                 if name.as_bytes()[0] == b'[' {
-                    return self.load_array_class(&class_loader_ref, name);
+                    // Array class
+                    class = Some(self.load_array_class(&class_loader_ref, name));
+                } else {
+                    // Non-array class
+                    class = Some(self.load_non_array_class(&class_loader_ref, name));
                 }
-                // Non-array class
-                self.load_non_array_class(&class_loader_ref, name)
+
+                if let Some(j_class) = self.class_map.get(CLASS_CLASS) {
+                    let j_class_mut = unsafe { j_class.as_ptr().as_mut().unwrap() };
+                    let mut obj = j_class_mut.new_object(j_class.clone());
+                    obj.set_extra(Some(Box::new(ClassData::new(class.clone().unwrap()))));
+                    class
+                        .as_mut()
+                        .unwrap()
+                        .borrow_mut()
+                        .set_j_class(Some(Rc::new(RefCell::new(obj))));
+                }
+
+                class.clone().unwrap()
             }
         }
+    }
+
+    /// Load `java.lang.Class` into JVM
+    fn load_basic_class(&mut self, self_ref: &RcRefCell<Self>) {
+        let j_class = self.load_class(self_ref.clone(), CLASS_CLASS.into());
+        let j_class_mut = unsafe { j_class.as_ptr().as_mut().unwrap() };
+        for (name, class) in self.class_map.iter() {
+            if class.borrow_mut().j_class().is_none() {
+                let mut obj = j_class_mut.new_object(j_class.clone());
+                obj.set_extra(Some(Box::new(ClassData::new(class.clone()))));
+                class
+                    .borrow_mut()
+                    .set_j_class(Some(Rc::new(RefCell::new(obj))));
+            }
+        }
+    }
+
+    /// Load the primitive type Boxed classes into JVM, such as: Integer, Boolean, ...
+    fn load_primitive_classes(&mut self, self_ref: &RcRefCell<Self>) {
+        for (primitive_class, _) in PRIMITIVE_TYPES.iter() {
+            self.load_primitive_class(self_ref, (*primitive_class).into());
+        }
+    }
+
+    fn load_primitive_class(&mut self, self_ref: &RcRefCell<Self>, class_name: String) {
+        let class_map = &mut self.class_map;
+        let j_class = class_map.get_mut(CLASS_CLASS).unwrap();
+        let j_class_mut = unsafe { j_class.as_ptr().as_mut().unwrap() };
+
+        let mut obj = j_class_mut.new_object(j_class.clone());
+
+        let class = Class::new_primitive_class(class_name);
+        obj.set_extra(Some(Box::new(ClassData::new(class.clone()))));
+
+        class.borrow_mut().set_loader(Some(self_ref.clone()));
+        class
+            .borrow_mut()
+            .set_j_class(Some(Rc::new(RefCell::new(obj))));
+
+        class_map.insert(class.borrow_mut().name().to_string(), class.clone());
     }
 
     fn load_array_class(

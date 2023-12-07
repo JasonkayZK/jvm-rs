@@ -1,4 +1,5 @@
-use crate::types::ObjectRef;
+use crate::rtda::object::Object;
+use crate::types::{ObjectRef, OptionRcRefCell};
 
 #[derive(Clone)]
 pub enum VarRef {
@@ -88,5 +89,9 @@ impl LocalVar {
 
     pub fn set_var(&mut self, index: usize, var: VarRef) {
         self.vars[index] = var;
+    }
+
+    pub fn get_this(&self) -> OptionRcRefCell<Object> {
+        self.get_ref(0)
     }
 }

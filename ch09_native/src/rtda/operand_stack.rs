@@ -111,4 +111,16 @@ impl OperandStack {
         self.size -= 1;
         self.vars[self.size].clone()
     }
+
+    pub fn pop_boolean(&mut self) -> bool {
+        self.pop_int() == 1
+    }
+
+    pub fn push_boolean(&mut self, val: bool) {
+        if val {
+            self.push_int(1);
+        } else {
+            self.push_int(0);
+        }
+    }
 }

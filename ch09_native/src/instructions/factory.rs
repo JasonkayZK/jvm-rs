@@ -7,6 +7,7 @@ use crate::instructions::references::{
     INVOKE_SPECIAL, INVOKE_STATIC, INVOKE_VIRTUAL, MULTI_ANEW_ARRAY, NEW, NEW_ARRAY, PUT_FIELD,
     PUT_STATIC,
 };
+use crate::instructions::reserved::*;
 
 use super::comparisons::*;
 use super::constants::*;
@@ -239,9 +240,7 @@ pub fn new_instruction(opcode: u8) -> Result<Box<dyn Instruction>, String> {
         // 0xca => {
         //     breakpoint
         // },
-        // 0xfe => {
-        //     impdep1
-        // },
+        0xfe => Box::new(INVOKE_NATIVE),
         // 0xff => {
         //     impdep2
         // },

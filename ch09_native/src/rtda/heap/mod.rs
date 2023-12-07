@@ -16,6 +16,7 @@ pub mod method;
 pub mod method_descriptor;
 pub mod method_lookup;
 pub mod method_ref;
+pub mod object_clone;
 pub mod object_ref;
 pub mod runtime_constant_pool;
 pub mod string_pool;
