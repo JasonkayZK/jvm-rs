@@ -20,6 +20,7 @@ members = [
     "ch07_method_invoke",
     "ch08_array_string",
     "ch09_native",
+    "ch10_exception",
 ]
 
 [workspace.dependencies]
