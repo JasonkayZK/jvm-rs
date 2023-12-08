@@ -3,6 +3,8 @@ use std::rc::Rc;
 
 use log::info;
 
+use crate::classfile::attribute_info::source_file::SourceFileAttribute;
+use crate::classfile::attribute_info::types::AttributeTypeNameEnum::SourceFile;
 use crate::classfile::attribute_info::{read_attributes, AttributeInfo};
 use crate::classfile::class_reader::ClassReader;
 use crate::classfile::constant_pool::{read_constant_pool, ConstantPool};
@@ -29,6 +31,8 @@ use crate::classfile::member_info::MemberInfo;
 /// }
 
 const MAGIC_NUMBER: u32 = 0xCAFEBABE;
+
+pub const UNKNOWN_FILE: &str = "Unknown";
 
 pub struct ClassFile {
     /// magic: u32,
@@ -118,6 +122,23 @@ impl ClassFile {
             interface_names.push(self.constant_pool.borrow().get_class_name(*i))
         }
         interface_names.to_vec()
+    }
+
+    pub fn source_file_name(&self) -> String {
+        if let Some(source_file) = self.source_file_attribute() {
+            return source_file.file_name();
+        }
+
+        UNKNOWN_FILE.into()
+    }
+
+    fn source_file_attribute(&self) -> Option<&SourceFileAttribute> {
+        for attr in &self.attributes {
+            if attr.name().eq(SourceFile.into()) {
+                return attr.as_any().downcast_ref::<SourceFileAttribute>();
+            }
+        }
+        None
     }
 
     fn read(&mut self, reader: &mut ClassReader) -> ClassFileResult<()> {

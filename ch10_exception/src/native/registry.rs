@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::sync::{OnceLock, RwLock};
 
-use crate::native::{class, double, float, object, string, system, vm};
+use crate::native::{class, double, float, object, string, system, throwable, vm};
 use crate::rtda::frame::Frame;
 
 /// The native method definition
@@ -41,6 +41,7 @@ impl NativeRegistry {
         string::init(data);
         system::init(data);
         vm::init(data);
+        throwable::init(data);
     }
 
     pub fn register(

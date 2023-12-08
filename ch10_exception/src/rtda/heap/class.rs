@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use crate::classfile::class_file::ClassFile;
+use crate::classfile::class_file::{ClassFile, UNKNOWN_FILE};
 use crate::rtda::heap::access_flags::{
     ACC_ABSTRACT, ACC_ANNOTATION, ACC_ENUM, ACC_FINAL, ACC_INTERFACE, ACC_PUBLIC, ACC_SUPER,
     ACC_SYNTHETIC,
@@ -16,9 +16,11 @@ use crate::rtda::heap::runtime_constant_pool::RuntimeConstantPool;
 use crate::rtda::object::Object;
 use crate::types::{ObjectRef, OptionRcRefCell, OptionVecRcRefCell, RcRefCell, VecRcRefCell};
 
+#[derive(Clone)]
 pub struct Class {
     access_flags: u16,
     name: String,
+    source_file_name: String,
     super_classname: String,
     interface_names: Vec<String>,
     constant_pool: OptionRcRefCell<RuntimeConstantPool>,
@@ -42,6 +44,7 @@ impl Class {
         let class = Class {
             access_flags: cf.access_flags(),
             name: cf.class_name(),
+            source_file_name: cf.source_file_name(),
             super_classname: cf.super_class_name(),
             interface_names: cf.interface_names(),
             constant_pool: None,
@@ -70,6 +73,7 @@ impl Class {
         let class = Class {
             access_flags: ACC_PUBLIC,
             name,
+            source_file_name: UNKNOWN_FILE.into(),
             super_classname: OBJECT_CLASS.into(),
             interface_names: vec![CLONEABLE_CLASS.into(), SERIALIZABLE_CLASS.into()],
             constant_pool: None,
@@ -91,6 +95,7 @@ impl Class {
         let class = Class {
             access_flags: ACC_PUBLIC,
             name,
+            source_file_name: UNKNOWN_FILE.into(),
             super_classname: "".into(),
             interface_names: vec![],
             constant_pool: None,
@@ -110,6 +115,14 @@ impl Class {
 
     pub fn name(&self) -> &str {
         &self.name
+    }
+
+    pub fn java_name(&self) -> String {
+        self.name.replace('/', ".")
+    }
+
+    pub fn source_file_name(&self) -> String {
+        self.source_file_name.clone()
     }
 
     pub fn fields(&self) -> VecRcRefCell<Field> {

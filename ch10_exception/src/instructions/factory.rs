@@ -3,9 +3,9 @@ use std::result::Result;
 use crate::instructions::base::Instruction;
 use crate::instructions::constants::ldc::{LDC, LDC2_W, LDC_W};
 use crate::instructions::references::{
-    ANEW_ARRAY, ARRAY_LENGTH, CHECK_CAST, GET_FIELD, GET_STATIC, INSTANCE_OF, INVOKE_INTERFACE,
-    INVOKE_SPECIAL, INVOKE_STATIC, INVOKE_VIRTUAL, MULTI_ANEW_ARRAY, NEW, NEW_ARRAY, PUT_FIELD,
-    PUT_STATIC,
+    ANEW_ARRAY, ARRAY_LENGTH, ATHROW, CHECK_CAST, GET_FIELD, GET_STATIC, INSTANCE_OF,
+    INVOKE_INTERFACE, INVOKE_SPECIAL, INVOKE_STATIC, INVOKE_VIRTUAL, MULTI_ANEW_ARRAY, NEW,
+    NEW_ARRAY, PUT_FIELD, PUT_STATIC,
 };
 use crate::instructions::reserved::*;
 
@@ -218,9 +218,7 @@ pub fn new_instruction(opcode: u8) -> Result<Box<dyn Instruction>, String> {
         0xbc => Box::<NEW_ARRAY>::default(),
         0xbd => Box::<ANEW_ARRAY>::default(),
         0xbe => Box::new(ARRAY_LENGTH),
-        // 0xbf => {
-        //     Box::new(ATHROW::default())
-        // },
+        0xbf => Box::<ATHROW>::default(),
         0xc0 => Box::<CHECK_CAST>::default(),
         0xc1 => Box::<INSTANCE_OF>::default(),
         // 0xc2 => {

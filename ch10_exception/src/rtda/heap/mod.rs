@@ -9,6 +9,7 @@ pub mod class_ref;
 pub mod constant;
 pub mod consts;
 pub mod errors;
+mod exception_table;
 pub mod field;
 pub mod field_ref;
 pub mod interface_ref;

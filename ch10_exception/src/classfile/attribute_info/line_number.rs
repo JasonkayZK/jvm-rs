@@ -8,16 +8,17 @@
 //!         u2 line_number;
 //!     } line_number_table[line_number_table_length];
 //! }
-use crate::classfile::attribute_info::types::AttributeTypeNameEnum;
 use std::any::Any;
 use std::cell::RefCell;
 use std::fmt::{Display, Formatter};
 use std::rc::Rc;
 
+use crate::classfile::attribute_info::types::AttributeTypeNameEnum;
 use crate::classfile::constant_pool::ConstantPool;
 
 use super::{AttributeInfo, ClassReader};
 
+#[derive(Clone)]
 pub struct LineNumberTableEntry {
     start_pc: u16,
     line_number: u16,
@@ -33,7 +34,7 @@ impl Display for LineNumberTableEntry {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct LineNumberTableAttribute {
     constant_pool: Rc<RefCell<ConstantPool>>,
     line_number_table: Vec<LineNumberTableEntry>,
@@ -59,6 +60,19 @@ impl Display for LineNumberTableAttribute {
                 .collect::<Vec<String>>()
                 .join("\n\t\t")
         )
+    }
+}
+
+impl LineNumberTableAttribute {
+    pub fn get_line_number(&self, pc: i64) -> i64 {
+        for i in (0..self.line_number_table.len()).rev() {
+            let entry = self.line_number_table.get(i);
+            if pc >= entry.as_ref().unwrap().start_pc as i64 {
+                return entry.unwrap().line_number as i64;
+            }
+        }
+
+        -1
     }
 }
 

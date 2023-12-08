@@ -1,12 +1,14 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
+use crate::classfile::attribute_info::line_number::LineNumberTableAttribute;
 use crate::classfile::member_info::MemberInfo;
 use crate::rtda::heap::access_flags::{
     ACC_ABSTRACT, ACC_BRIDGE, ACC_FINAL, ACC_NATIVE, ACC_PRIVATE, ACC_PROTECTED, ACC_PUBLIC,
     ACC_STATIC, ACC_STRICT, ACC_SYNCHRONIZED, ACC_SYNTHETIC, ACC_VARARGS,
 };
 use crate::rtda::heap::class::Class;
+use crate::rtda::heap::exception_table::ExceptionTable;
 use crate::rtda::heap::method_descriptor::MethodDescriptorParser;
 use crate::types::{OptionRcRefCell, RcRefCell};
 
@@ -22,6 +24,10 @@ pub struct Method {
     code: Vec<u8>,
 
     arg_object_ref_count: u64,
+
+    // Exception implementation
+    exception_table: Option<ExceptionTable>,
+    line_number_table: Option<LineNumberTableAttribute>,
 }
 
 impl Method {
@@ -141,15 +147,52 @@ impl Method {
         class.eq(c)
     }
 
+    /// Find the exception handler
+    ///
+    /// Returns -1 if not found
+    pub fn find_exception_handler(&mut self, ex_class: &RcRefCell<Class>, pc: i64) -> i64 {
+        if let Some(handler) = self
+            .exception_table
+            .as_mut()
+            .unwrap()
+            .find_exception_handler(ex_class, pc)
+        {
+            return handler.handler_pc();
+        }
+
+        -1
+    }
+
+    /// Get the exception stack line number
+    ///
+    /// Native method: -2
+    ///
+    /// Dynamic generated method(Or else): -1
+    pub fn get_line_number(&self, pc: i64) -> i64 {
+        if self.is_native() {
+            return -2;
+        }
+        if self.line_number_table.is_none() {
+            return -1;
+        }
+        self.line_number_table.as_ref().unwrap().get_line_number(pc)
+    }
+
     fn new(class: RcRefCell<Class>, cf_method: &MemberInfo) -> RcRefCell<Self> {
-        let (max_stack, max_locals, code) = match cf_method.code_attribute() {
-            Some(code_attr) => (
-                code_attr.max_stack(),
-                code_attr.max_locals(),
-                code_attr.code(),
-            ),
-            None => (0, 0, vec![]),
-        };
+        let (max_stack, max_locals, code, exception_table, line_number_table) =
+            match cf_method.code_attribute() {
+                Some(code_attr) => (
+                    code_attr.max_stack(),
+                    code_attr.max_locals(),
+                    code_attr.code(),
+                    Some(ExceptionTable::new(
+                        code_attr.exception_table(),
+                        &class.borrow().constant_pool(),
+                    )),
+                    code_attr.line_number_table_attribute(),
+                ),
+                None => (0, 0, vec![], None, None),
+            };
 
         let mut method = Method {
             access_flags: cf_method.access_flags(),
@@ -160,6 +203,8 @@ impl Method {
             max_locals,
             code,
             arg_object_ref_count: 0,
+            exception_table,
+            line_number_table,
         };
         let parsed_descriptor = MethodDescriptorParser::parse(method.descriptor.clone());
         method.calc_arg_object_ref_count(&parsed_descriptor.parameter_types());

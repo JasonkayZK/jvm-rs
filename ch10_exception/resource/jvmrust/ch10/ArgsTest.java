@@ -12,7 +12,7 @@ public class ArgsTest {
         try {
             bar(args);
         } catch (NumberFormatException e) {
-            System.out.println(e.getMessage());
+            System.out.println("NumberFormatException: " + e.getMessage());
         }
     }
 
@@ -21,6 +21,15 @@ public class ArgsTest {
             throw new IndexOutOfBoundsException("No args!");
         }
         System.out.println(Arrays.toString(args));
+        boolean x = isNumeric(args[0]);
+        System.out.println(x);
+    }
+
+    private static boolean isNumeric(String str) throws NumberFormatException {
+        if (str != null && str.matches("[0-9.]+")) {
+            return true;
+        }
+        throw new NumberFormatException("Not number!");
     }
 
 }

@@ -7,6 +7,7 @@ use std::rc::Rc;
 
 use crate::rtda::errors::RuntimeDataAreaError;
 use crate::rtda::frame::Frame;
+use crate::types::RcRefCell;
 
 #[derive(Default)]
 pub struct Stack {
@@ -46,6 +47,20 @@ impl Stack {
             panic!("{}", RuntimeDataAreaError::StackEmpty);
         }
         self.frames[self.top - 1].clone().unwrap()
+    }
+
+    pub fn get_frames(&self) -> Vec<RcRefCell<Frame>> {
+        let mut frames = Vec::new();
+        for i in (0..self.top).rev() {
+            frames.push(self.frames[i].clone().unwrap());
+        }
+        frames
+    }
+
+    pub fn clear(&mut self) {
+        while !self.is_empty() {
+            self.pop();
+        }
     }
 
     pub fn is_empty(&self) -> bool {

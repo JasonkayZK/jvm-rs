@@ -10,6 +10,8 @@ pub mod object;
 pub mod string;
 #[path = "java/lang/system.rs"]
 pub mod system;
+#[path = "java/lang/throwable.rs"]
+pub mod throwable;
 #[path = "sun/misc/vm.rs"]
 pub mod vm;
 

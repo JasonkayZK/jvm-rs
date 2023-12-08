@@ -50,6 +50,14 @@ impl Thread {
         self.stack.top()
     }
 
+    pub fn get_frames(&self) -> Vec<RcRefCell<Frame>> {
+        self.stack.get_frames()
+    }
+
+    pub fn clear_stack(&mut self) {
+        self.stack.clear();
+    }
+
     pub fn is_stack_empty(&self) -> bool {
         self.stack.is_empty()
     }

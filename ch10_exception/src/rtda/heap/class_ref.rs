@@ -11,6 +11,7 @@ use crate::rtda::heap::constant::Constant;
 use crate::rtda::heap::errors::RuntimeHeapError;
 use crate::types::{OptionRcRefCell, RcRefCell};
 
+#[derive(Clone)]
 pub struct ClassRef {
     class_name: String,
     class: OptionRcRefCell<Class>,

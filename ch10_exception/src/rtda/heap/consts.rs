@@ -21,6 +21,8 @@ pub static CLASS_CLASS: &str = "java/lang/Class";
 
 pub static VM_CLASS: &str = "sun/misc/VM";
 
+pub static THROWABLE_CLASS: &str = "java/lang/Throwable";
+
 pub enum ArrayTypeEnum {
     Bytes,
     Shorts,

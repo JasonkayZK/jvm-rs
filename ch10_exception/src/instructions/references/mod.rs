@@ -1,5 +1,6 @@
 pub use self::anewarray::*;
 pub use self::arraylength::*;
+pub use self::athrow::*;
 pub use self::checkcast::*;
 pub use self::getfield::*;
 pub use self::getstatic::*;
@@ -16,6 +17,7 @@ pub use self::putstatic::*;
 
 mod anewarray;
 mod arraylength;
+mod athrow;
 mod checkcast;
 mod getfield;
 mod getstatic;

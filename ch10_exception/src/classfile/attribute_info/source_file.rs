@@ -6,12 +6,12 @@
 //!     u2 source_file_index;
 //! }
 
-use crate::classfile::attribute_info::types::AttributeTypeNameEnum;
 use std::any::Any;
 use std::cell::RefCell;
 use std::fmt::{Display, Formatter};
 use std::rc::Rc;
 
+use crate::classfile::attribute_info::types::AttributeTypeNameEnum;
 use crate::classfile::constant_pool::ConstantPool;
 
 use super::{AttributeInfo, ClassReader};
@@ -52,5 +52,9 @@ impl SourceFileAttribute {
             constant_pool: cp,
             ..Default::default()
         }
+    }
+
+    pub fn file_name(&self) -> String {
+        self.constant_pool.borrow().get_utf8(self.source_file_index)
     }
 }

@@ -123,4 +123,11 @@ impl OperandStack {
             self.push_int(0);
         }
     }
+
+    pub fn clear(&mut self) {
+        self.size = 0;
+        for var_ref in self.vars.iter_mut() {
+            *var_ref = VarRef::Ref(None);
+        }
+    }
 }
